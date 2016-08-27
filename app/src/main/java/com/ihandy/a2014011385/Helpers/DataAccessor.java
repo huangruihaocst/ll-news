@@ -11,11 +11,13 @@ public class DataAccessor {
 
     private DataAccessor() {}
 
-    public static String[] getChannels() {
+    public String[] getChannels() {
         return new String[]{"Sports", "Arts", "Biology"};
     }
 
-    public static String[] getNews(String channel) {
+    public News[] getNewsList(String channel) {
         return null;
     }
+
+    public News getNews(long ID) {return null;}
 }
