@@ -55,6 +55,12 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        TabLayout channels = (TabLayout)findViewById(R.id.channels_tabs);
+        channels.setTabMode(TabLayout.MODE_SCROLLABLE);
+        channels.addTab(channels.newTab().setText("123"));
+        channels.addTab(channels.newTab().setText("123"));
+        channels.addTab(channels.newTab().setText("123"));
+
     }
 
     @Override
