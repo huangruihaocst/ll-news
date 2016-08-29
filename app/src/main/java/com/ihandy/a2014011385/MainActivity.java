@@ -1,6 +1,7 @@
 package com.ihandy.a2014011385;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,11 +17,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ihandy.a2014011385.Adapters.ChannelsPagerAdapter;
-import com.ihandy.a2014011385.Helpers.*;
+import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
+import com.ihandy.a2014011385.fragments.NewsListFragment;
+import com.ihandy.a2014011385.helpers.*;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        NewsListFragment.OnFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,18 +52,20 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        TabLayout channels = (TabLayout)findViewById(R.id.channels_tabs);
+        ViewPager pager = (ViewPager) findViewById(R.id.news_pager);
+        CategoriesPagerAdapter adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(NewsListFragment.newInstance("", ""), "Sports");
+        adapter.addFragment(NewsListFragment.newInstance("", ""), "Arts");
+        pager.setAdapter(adapter);
+        TabLayout channels = (TabLayout) findViewById(R.id.categories_tabs);
         channels.setTabMode(TabLayout.MODE_SCROLLABLE);
-        channels.addTab(channels.newTab().setText("123"));
-        channels.addTab(channels.newTab().setText("123"));
-        channels.addTab(channels.newTab().setText("123"));
-
+        channels.setupWithViewPager(pager);
     }
 
     @Override
@@ -118,5 +123,10 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

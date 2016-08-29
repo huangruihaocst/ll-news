@@ -7,12 +7,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.webkit.WebView;
-import android.widget.Toast;
 
-import com.ihandy.a2014011385.Helpers.BundleHelper;
-import com.ihandy.a2014011385.Helpers.DataAccessor;
-import com.ihandy.a2014011385.Helpers.News;
+import com.ihandy.a2014011385.helpers.BundleHelper;
+import com.ihandy.a2014011385.helpers.DataAccessor;
+import com.ihandy.a2014011385.helpers.News;
 
 public class NewsActivity extends AppCompatActivity {
 

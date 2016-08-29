@@ -1,4 +1,4 @@
-package com.ihandy.a2014011385.Helpers;
+package com.ihandy.a2014011385.helpers;
 
 import java.io.Serializable;
 
