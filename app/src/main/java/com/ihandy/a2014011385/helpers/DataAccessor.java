@@ -1,4 +1,7 @@
 package com.ihandy.a2014011385.helpers;
+
+import java.util.ArrayList;
+
 /**
  * Created by huangruihao on 16-8-26.
  */
@@ -11,11 +14,11 @@ public class DataAccessor {
 
     private DataAccessor() {}
 
-    public String[] getChannels() {
+    public String[] getCategories() {
         return new String[]{"Sports", "Arts", "Biology"};
     }
 
-    public News[] getNewsList(String channel) {
+    public ArrayList<News> getNewsArrayList(String category) {
         return null;
     }
 
