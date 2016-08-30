@@ -45,6 +45,10 @@ public class NewsListFragment extends Fragment {
     private final int GET_NEWS_MESSAGE_WHAT = 0;
     private final int GET_MORE_NEWS_MESSAGE_WHAT = 1;
 
+    private DataAccessor accessor = DataAccessor.getInstance();
+    private RecyclerView newsRecyclerView;
+    private ArrayList<News> newsArrayList;
+
     /**
      * Handle UI conduction when a message comes.
      */
@@ -54,7 +58,7 @@ public class NewsListFragment extends Fragment {
             // TODO: add real handling of message
             switch (message.what) {
                 case GET_NEWS_MESSAGE_WHAT:
-                    Toast.makeText(getContext(), "get news done", Toast.LENGTH_LONG).show();
+                    newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(), newsArrayList));
                     break;
                 case GET_MORE_NEWS_MESSAGE_WHAT:
                     Toast.makeText(getContext(), "get more news done", Toast.LENGTH_LONG).show();
@@ -98,12 +102,11 @@ public class NewsListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_news_list, container, false);
-        RecyclerView newsRecyclerView  = (RecyclerView) root.findViewById(R.id.list);
+        newsRecyclerView = (RecyclerView) root.findViewById(R.id.list);
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getContext());
-        ArrayList<News> newsArrayList = accessor.getNewsArrayList(category); // in new thread
-        newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(), newsArrayList)); // in handler
+
         GetNewsThread thread = new GetNewsThread();
         thread.start();
         return root;
@@ -151,11 +154,7 @@ public class NewsListFragment extends Fragment {
     class GetNewsThread extends Thread {
         @Override
         public void run() {
-            try{
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                Log.e(NEWS_LIST_FRAGMENT_TAG, e.getMessage());
-            }
+            newsArrayList = accessor.getNewsArrayList(category); // in new thread
             Message getNewsDoneMessage = new Message();
             getNewsDoneMessage.what = GET_NEWS_MESSAGE_WHAT;
             handler.sendMessage(getNewsDoneMessage);

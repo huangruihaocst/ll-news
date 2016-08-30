@@ -103,4 +103,6 @@
     <string name="item_source">来源</string>
     <string name="item_image">图片</string>
 
+    <string name="network_error">网络连接错误</string>
+
 </resources>
