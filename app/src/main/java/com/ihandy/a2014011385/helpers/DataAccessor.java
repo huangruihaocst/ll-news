@@ -38,6 +38,7 @@ public class DataAccessor {
     private DataAccessor() {}
 
     public void getCategories(long timestamp, final CallBack<String> callBack) {
+        // TODO: add 2 levels of cache
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = GET_CATEGORY_URL + timestamp;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
