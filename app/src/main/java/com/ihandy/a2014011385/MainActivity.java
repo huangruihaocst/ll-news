@@ -21,6 +21,8 @@ import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
 import com.ihandy.a2014011385.fragments.NewsListFragment;
 import com.ihandy.a2014011385.helpers.*;
 
+import java.util.HashMap;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         NewsListFragment.OnFragmentInteractionListener {
@@ -64,9 +66,18 @@ public class MainActivity extends AppCompatActivity
         adapter.addFragment(NewsListFragment.newInstance("Sports"), "Sports");
         adapter.addFragment(NewsListFragment.newInstance("Arts"), "Arts");
         pager.setAdapter(adapter);
-        TabLayout channels = (TabLayout) findViewById(R.id.categories_tabs);
-        channels.setTabMode(TabLayout.MODE_SCROLLABLE);
-        channels.setupWithViewPager(pager);
+        TabLayout categoriesTabLayout = (TabLayout) findViewById(R.id.categories_tabs);
+        categoriesTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+        categoriesTabLayout.setupWithViewPager(pager);
+
+        DataAccessor accessor = DataAccessor.getInstance();
+        accessor.setContext(getApplicationContext());
+        accessor.getCategories(111111111, new CallBack<String>() {
+            @Override
+            public void callBack(String response) {
+
+            }
+        });
     }
 
     @Override
