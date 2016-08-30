@@ -12,17 +12,17 @@ import java.util.ArrayList;
  * Created by huangruihao on 16-8-27.
  */
 public class News {
-    private String category;
-    private String country;
-    private long fetchedTime; // timestamp
-    private String[] imageURLs;
-    private long ID;
-    private String origin;
-    private News[] relativeNews;
-    private String sourceName;
-    private String sourceURL;
-    private String title;
-    private long updatedTime; // timestamp
+    String category;
+    String country;
+    long fetchedTime; // timestamp
+    String[] imageURLs;
+    long ID;
+    String origin;
+    News[] relativeNews;
+    String sourceName;
+    String sourceURL;
+    String title;
+    long updatedTime; // timestamp
     Context context;
 
     private final String NEWS_TAG = "News";
@@ -32,23 +32,7 @@ public class News {
     }
 
     public News(String newsJSON) { // DataAccessor has permit the newsJSON to be valid
-        try {
-            JSONObject newsObject = new JSONObject(newsJSON);
-            category = newsObject.getString("category");
-            country = newsObject.getString("country");
-            fetchedTime = newsObject.getLong("fetched_time");
-            imageURLs = (String[])toArray(newsObject.getJSONArray("imgs"));
-            ID = newsObject.getLong("news_id");
-            origin = newsObject.getString("origin");
-            relativeNews = (News[])toArray(newsObject.getJSONArray("relative_news"));
-            sourceName = newsObject.getJSONObject("source").getString("name");
-            sourceURL = newsObject.getJSONObject("source").getString("url");
-            title = newsObject.getString("title");
-            updatedTime = newsObject.getLong("updated_time");
-        } catch (org.json.JSONException e) {
-            Log.e(NEWS_TAG, e.getMessage());
-        }
-
+        ParseHelper.parseNews(this, newsJSON);
     }
 
     public static News newSimpleNewsInstance(Context context, String title, long time, String sourceURL) {
@@ -97,13 +81,5 @@ public class News {
     public Image[] getImages() {
         // TODO: add real getImages method
         return null;
-    }
-
-    private Object[] toArray(JSONArray jsonArray) {
-        ArrayList<Object> objectArrayList = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); ++i) {
-            objectArrayList.add(objectArrayList.get(i));
-        }
-        return objectArrayList.toArray();
     }
 }

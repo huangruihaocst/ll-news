@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Handler;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ihandy.a2014011385.R;

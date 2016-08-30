@@ -1,10 +1,6 @@
 package com.ihandy.a2014011385.helpers;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.support.v4.util.Pair;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -17,17 +13,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.ihandy.a2014011385.R;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by huangruihao on 16-8-26.
@@ -53,28 +40,19 @@ public class DataAccessor {
     public void getCategories(long timestamp, final CallBack<String> callBack) {
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = GET_CATEGORY_URL + timestamp;
-        Cache cache = queue.getCache();
-        Cache.Entry entry = cache.get(url);
-        if (entry != null) { // data already exist in cache
-            try {
-                String data = new String(entry.data, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                Log.e(DATA_ACCESSOR_TAG, e.getMessage());
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                callBack.onCallBack(response);
             }
-        } else {
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    callBack.callBack(response);
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) { // something wrong with the network
-                    Toast.makeText(context, context.getString(R.string.network_error), Toast.LENGTH_LONG).show();
-                }
-            });
-            queue.add(stringRequest);
-        }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
+                Toast.makeText(context, context.getString(R.string.network_error), Toast.LENGTH_LONG).show();
+                Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
+            }
+        });
+        queue.add(stringRequest);
     }
 
     public ArrayList<News> getNewsArrayList(String category) {

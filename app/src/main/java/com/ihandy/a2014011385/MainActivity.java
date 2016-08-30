@@ -3,6 +3,9 @@ package com.ihandy.a2014011385;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -16,16 +19,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
 import com.ihandy.a2014011385.fragments.NewsListFragment;
 import com.ihandy.a2014011385.helpers.*;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         NewsListFragment.OnFragmentInteractionListener {
+
+    HashMap<String, String> categories;
+
+    private final int GET_CATEGORIES_DONE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,21 +71,41 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         ViewPager pager = (ViewPager) findViewById(R.id.news_pager);
-        CategoriesPagerAdapter adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
+        final CategoriesPagerAdapter adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
         // TODO: add real Fragments to adapter (should be done in handler)
-        adapter.addFragment(NewsListFragment.newInstance("Sports"), "Sports");
-        adapter.addFragment(NewsListFragment.newInstance("Arts"), "Arts");
         pager.setAdapter(adapter);
         TabLayout categoriesTabLayout = (TabLayout) findViewById(R.id.categories_tabs);
         categoriesTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         categoriesTabLayout.setupWithViewPager(pager);
 
+        final Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case GET_CATEGORIES_DONE:
+                        Iterator iterator = categories.entrySet().iterator();
+                        while(iterator.hasNext()) {
+                            Map.Entry entry = (Map.Entry) iterator.next();
+                            adapter.addFragment(NewsListFragment.newInstance(
+                                    (String)entry.getKey()), (String)entry.getValue());
+                            iterator.remove();
+                        }
+                        break;
+                    default:
+                        // nothing
+                }
+            }
+        };
+
         DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getApplicationContext());
         accessor.getCategories(111111111, new CallBack<String>() {
             @Override
-            public void callBack(String response) {
-
+            public void onCallBack(String response) {
+                categories = ParseHelper.parseCategoriesHashMap(response);
+                Message message = new Message();
+                message.what = GET_CATEGORIES_DONE;
+                handler.sendMessage(message);
             }
         });
     }
