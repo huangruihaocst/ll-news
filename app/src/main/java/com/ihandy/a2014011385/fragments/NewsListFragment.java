@@ -8,10 +8,12 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Handler;
+import android.widget.Toast;
 
 import com.ihandy.a2014011385.R;
 import com.ihandy.a2014011385.adapters.NewsRecyclerAdapter;
@@ -37,6 +39,31 @@ public class NewsListFragment extends Fragment {
     private String category;
 
     private OnFragmentInteractionListener mListener;
+
+    private final String NEWS_LIST_FRAGMENT_TAG = "NewsListFragment";
+
+    private final int GET_NEWS_MESSAGE_WHAT = 0;
+    private final int GET_MORE_NEWS_MESSAGE_WHAT = 1;
+
+    /**
+     * Handle UI conduction when a message comes.
+     */
+    Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message message) {
+            // TODO: add real handling of message
+            switch (message.what) {
+                case GET_NEWS_MESSAGE_WHAT:
+                    Toast.makeText(getContext(), "get news done", Toast.LENGTH_LONG).show();
+                    break;
+                case GET_MORE_NEWS_MESSAGE_WHAT:
+                    Toast.makeText(getContext(), "get more news done", Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    // nothing will be done
+            }
+        }
+    };
 
     public NewsListFragment() {
         // Required empty public constructor
@@ -73,14 +100,12 @@ public class NewsListFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_news_list, container, false);
         RecyclerView newsRecyclerView  = (RecyclerView) root.findViewById(R.id.list);
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        Handler handler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message message) {
-                // TODO: handle UI
-            }
-        };
-        ArrayList<News> newsArrayList = DataAccessor.getInstance().getNewsArrayList(category);
-        newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(), newsArrayList));
+        DataAccessor accessor = DataAccessor.getInstance();
+        accessor.setContext(getContext());
+        ArrayList<News> newsArrayList = accessor.getNewsArrayList(category); // in new thread
+        newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(), newsArrayList)); // in handler
+        GetNewsThread thread = new GetNewsThread();
+        thread.start();
         return root;
     }
 
@@ -121,5 +146,19 @@ public class NewsListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    class GetNewsThread extends Thread {
+        @Override
+        public void run() {
+            try{
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                Log.e(NEWS_LIST_FRAGMENT_TAG, e.getMessage());
+            }
+            Message getNewsDoneMessage = new Message();
+            getNewsDoneMessage.what = GET_NEWS_MESSAGE_WHAT;
+            handler.sendMessage(getNewsDoneMessage);
+        }
     }
 }

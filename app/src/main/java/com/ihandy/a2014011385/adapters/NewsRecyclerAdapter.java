@@ -1,8 +1,7 @@
 package com.ihandy.a2014011385.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,7 +52,7 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
         titleTextView.setText(news.getTitle());
         timeTextView.setText(String.valueOf(news.getFetchedTime()));
         sourceTextView.setText(news.getSourceURL());
-        imageView.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_menu_camera));
+        imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_menu_camera));
     }
 
     @Override

@@ -60,7 +60,9 @@ public class MainActivity extends AppCompatActivity
 
         ViewPager pager = (ViewPager) findViewById(R.id.news_pager);
         CategoriesPagerAdapter adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
-        // TODO: add Fragments to adapter
+        // TODO: add real Fragments to adapter (should be done in handler)
+        adapter.addFragment(NewsListFragment.newInstance("Sports"), "Sports");
+        adapter.addFragment(NewsListFragment.newInstance("Arts"), "Arts");
         pager.setAdapter(adapter);
         TabLayout channels = (TabLayout) findViewById(R.id.categories_tabs);
         channels.setTabMode(TabLayout.MODE_SCROLLABLE);
