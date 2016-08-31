@@ -18,7 +18,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/title"
-                android:textSize="50sp"
+                android:textSize="20sp"
                 android:contentDescription="@string/item_title"
                 android:text="@string/item_title"
                 android:layout_alignParentTop="true"
@@ -34,7 +34,7 @@
                 android:textSize="12sp"
                 android:contentDescription="@string/item_time"
                 android:text="@string/item_time"
-                android:layout_alignBottom="@+id/image"
+                android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 

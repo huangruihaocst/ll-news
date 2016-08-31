@@ -12,7 +12,11 @@ import android.widget.TextView;
 import com.ihandy.a2014011385.R;
 import com.ihandy.a2014011385.helpers.News;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by huangruihao on 16-8-29.
@@ -50,8 +54,10 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         News news = newsArrayList.get(position);
         titleTextView.setText(news.getTitle());
-        timeTextView.setText(String.valueOf(news.getFetchedTime()));
-        sourceTextView.setText(news.getSourceURL());
+        Date date = new Date(news.getUpdatedTime());
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        timeTextView.setText(formatter.format(date));
+        sourceTextView.setText(news.getSourceName());
         imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_menu_camera));
     }
 

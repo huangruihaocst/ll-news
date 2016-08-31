@@ -19,7 +19,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
 import com.ihandy.a2014011385.fragments.NewsListFragment;
@@ -35,7 +34,7 @@ public class MainActivity extends AppCompatActivity
 
     HashMap<String, String> categories;
 
-    private final int GET_CATEGORIES_DONE = 0;
+    private final int GET_CATEGORIES_MESSAGE_WHAT = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +71,6 @@ public class MainActivity extends AppCompatActivity
 
         ViewPager pager = (ViewPager) findViewById(R.id.news_pager);
         final CategoriesPagerAdapter adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
-        // TODO: add real Fragments to adapter (should be done in handler)
         pager.setAdapter(adapter);
         TabLayout categoriesTabLayout = (TabLayout) findViewById(R.id.categories_tabs);
         categoriesTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
@@ -82,7 +80,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case GET_CATEGORIES_DONE:
+                    case GET_CATEGORIES_MESSAGE_WHAT:
                         Iterator iterator = categories.entrySet().iterator();
                         while(iterator.hasNext()) {
                             Map.Entry entry = (Map.Entry) iterator.next();
@@ -99,12 +97,12 @@ public class MainActivity extends AppCompatActivity
 
         DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getApplicationContext());
-        accessor.getCategories(111111111, new CallBack<String>() {
+        accessor.getCategories(System.currentTimeMillis(), new CallBack<String>() {
             @Override
             public void onCallBack(String response) {
                 categories = ParseHelper.parseCategoriesHashMap(response);
                 Message message = new Message();
-                message.what = GET_CATEGORIES_DONE;
+                message.what = GET_CATEGORIES_MESSAGE_WHAT;
                 handler.sendMessage(message);
             }
         });

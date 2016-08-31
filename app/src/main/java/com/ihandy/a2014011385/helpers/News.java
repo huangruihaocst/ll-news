@@ -18,7 +18,7 @@ public class News {
     String[] imageURLs;
     long ID;
     String origin;
-    News[] relativeNews;
+    long[] relativeNews; // the IDs of relative news
     String sourceName;
     String sourceURL;
     String title;
@@ -62,7 +62,7 @@ public class News {
     public String getOrigin() {
         return origin;
     }
-    public News[] getRelativeNews() {
+    public long[] getRelativeNews() {
         return relativeNews;
     }
     public String getSourceName() {

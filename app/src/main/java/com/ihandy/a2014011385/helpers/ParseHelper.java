@@ -1,6 +1,7 @@
 package com.ihandy.a2014011385.helpers;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,10 +41,18 @@ public class ParseHelper {
             news.category = newsObject.getString("category");
             news.country = newsObject.getString("country");
             news.fetchedTime = newsObject.getLong("fetched_time");
-            news.imageURLs = (String[])toArray(newsObject.getJSONArray("imgs"));
+            if (!newsObject.isNull("imgs")) {
+                news.imageURLs = toStringArray(newsObject.getJSONArray("imgs"));
+            } else {
+                news.imageURLs = null;
+            }
             news.ID = newsObject.getLong("news_id");
             news.origin = newsObject.getString("origin");
-            news.relativeNews = (News[])toArray(newsObject.getJSONArray("relative_news"));
+            if (!newsObject.isNull("relative_news")) {
+                news.relativeNews = toLongArray(newsObject.getJSONArray("relative_news"));
+            } else {
+                news.relativeNews = null;
+            }
             news.sourceName = newsObject.getJSONObject("source").getString("name");
             news.sourceURL = newsObject.getJSONObject("source").getString("url");
             news.title = newsObject.getString("title");
@@ -53,11 +62,36 @@ public class ParseHelper {
         }
     }
 
-    private static Object[] toArray(JSONArray jsonArray) {
-        ArrayList<Object> objectArrayList = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); ++i) {
-            objectArrayList.add(objectArrayList.get(i));
+    public static ArrayList<News> parseNewsList(String newsListJSON) {
+        ArrayList<News> newsArrayList = new ArrayList<>();
+        try {
+            JSONObject responseListObject = new JSONObject(newsListJSON);
+            JSONObject dataObject = responseListObject.getJSONObject("data");
+            JSONArray newsListArray = dataObject.getJSONArray("news");
+            for (int i = 0; i < newsListArray.length(); ++i) {
+                JSONObject newsObject = newsListArray.getJSONObject(i);
+                News news = new News(newsObject.toString());
+                newsArrayList.add(news);
+            }
+        } catch (JSONException e) {
+            Log.e(PARSE_HELPER_TAG, e.getMessage());
         }
-        return objectArrayList.toArray();
+        return newsArrayList;
+    }
+
+    private static String[] toStringArray(JSONArray jsonArray) throws JSONException{
+        String[] stringArray = new String[jsonArray.length()];
+        for (int i = 0; i < jsonArray.length(); ++i) {
+            stringArray[i] = jsonArray.getString(i);
+        }
+        return stringArray;
+    }
+
+    private static long[] toLongArray(JSONArray jsonArray) throws JSONException{
+        long[] longArray = new long[jsonArray.length()];
+        for (int i = 0; i < jsonArray.length(); ++i) {
+            longArray[i] = jsonArray.getLong(i);
+        }
+        return longArray;
     }
 }

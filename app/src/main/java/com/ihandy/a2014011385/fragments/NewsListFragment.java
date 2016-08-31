@@ -8,18 +8,18 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Handler;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ihandy.a2014011385.R;
 import com.ihandy.a2014011385.adapters.NewsRecyclerAdapter;
+import com.ihandy.a2014011385.helpers.CallBack;
 import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
+import com.ihandy.a2014011385.helpers.ParseHelper;
 
 import java.util.ArrayList;
 
@@ -43,7 +43,7 @@ public class NewsListFragment extends Fragment {
 
     private final String NEWS_LIST_FRAGMENT_TAG = "NewsListFragment";
 
-    private final int GET_NEWS_MESSAGE_WHAT = 0;
+    private final int GET_NEWS_LIST_MESSAGE_WHAT = 0;
     private final int GET_MORE_NEWS_MESSAGE_WHAT = 1;
 
     private DataAccessor accessor = DataAccessor.getInstance();
@@ -58,7 +58,7 @@ public class NewsListFragment extends Fragment {
         public void handleMessage(Message message) {
             // TODO: add real handling of message
             switch (message.what) {
-                case GET_NEWS_MESSAGE_WHAT:
+                case GET_NEWS_LIST_MESSAGE_WHAT:
                     newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(), newsArrayList));
                     break;
                 case GET_MORE_NEWS_MESSAGE_WHAT:
@@ -105,11 +105,19 @@ public class NewsListFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_news_list, container, false);
         newsRecyclerView = (RecyclerView) root.findViewById(R.id.list);
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getContext());
+        accessor.getNewsList(category, new CallBack<String>() {
+            @Override
+            public void onCallBack(String response) {
+                newsArrayList = ParseHelper.parseNewsList(response);
+                Message message = new Message();
+                message.what = GET_NEWS_LIST_MESSAGE_WHAT;
+                handler.sendMessage(message);
+            }
+        });
 
-        GetNewsThread thread = new GetNewsThread();
-        thread.start();
         return root;
     }
 
@@ -150,15 +158,5 @@ public class NewsListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
-    }
-
-    class GetNewsThread extends Thread {
-        @Override
-        public void run() {
-            newsArrayList = accessor.getNewsArrayList(category); // in new thread
-            Message getNewsDoneMessage = new Message();
-            getNewsDoneMessage.what = GET_NEWS_MESSAGE_WHAT;
-            handler.sendMessage(getNewsDoneMessage);
-        }
     }
 }
