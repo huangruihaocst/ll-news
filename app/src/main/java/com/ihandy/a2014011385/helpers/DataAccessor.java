@@ -48,10 +48,6 @@ public class DataAccessor {
             Toast.makeText(context, "in memory", Toast.LENGTH_LONG).show();
             callBack.onCallBack(cache.categories);
         } else { // nothing in memory, into the second level of cache: database
-            DatabaseHelper databaseHelper = new DatabaseHelper(context,
-                    context.getString(R.string.app_name), null, 1);
-            final SQLiteDatabase database = databaseHelper.getWritableDatabase();
-
             RequestQueue queue = Volley.newRequestQueue(context);
             String url = GET_CATEGORIES_URL + timestamp;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -62,12 +58,6 @@ public class DataAccessor {
                     cache.categories = categories; // refresh the first level of cache
 
                     // TODO: refresh the second level of cache
-                    final String NEW_TABLE = "CREATE TABLE IF NOT EXISTS categories (" +
-                            "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "name TEXT," +
-                            "title TEXT," +
-                            "subscription INTEGER);";
-                    database.execSQL(NEW_TABLE);
 
                     callBack.onCallBack(categories);
                 }
