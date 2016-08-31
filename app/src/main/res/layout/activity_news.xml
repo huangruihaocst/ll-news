@@ -27,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/image"
                 android:contentDescription="@string/item_image"
-                android:scaleType="fitXY"
+                android:scaleType="centerCrop"
                 android:alpha="0.6"/>
 
             <android.support.v7.widget.Toolbar

@@ -89,10 +89,10 @@ public class MainActivity extends AppCompatActivity
 
         DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getApplicationContext());
-        accessor.getCategories(System.currentTimeMillis(), new CallBack<String>() {
+        accessor.getCategories(System.currentTimeMillis(), new CallBack<HashMap<String, String>>() {
             @Override
-            public void onCallBack(String response) {
-                categories = ParseHelper.parseCategoriesHashMap(response);
+            public void onCallBack(HashMap<String, String> response) {
+                categories = response;
                 Message message = new Message();
                 message.what = GET_CATEGORIES_MESSAGE_WHAT;
                 handler.sendMessage(message);

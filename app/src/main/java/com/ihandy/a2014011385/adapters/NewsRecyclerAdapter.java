@@ -17,6 +17,7 @@ import com.ihandy.a2014011385.R;
 import com.ihandy.a2014011385.helpers.CallBack;
 import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
+import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -80,14 +81,7 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
         if (news.getImageURLs() == null) {
             imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_error_black_48dp));
         } else {
-            DataAccessor accessor = DataAccessor.getInstance();
-            accessor.setContext(context);
-            accessor.getImage(news.getImageURLs()[0], new CallBack<ImageLoader.ImageContainer>() {
-                @Override
-                public void onCallBack(ImageLoader.ImageContainer response) {
-                    imageView.setImageBitmap(response.getBitmap());
-                }
-            });
+            Picasso.with(context).load(news.getImageURLs()[0]).into(imageView);
         }
 
     }

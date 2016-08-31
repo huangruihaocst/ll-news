@@ -19,6 +19,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.ihandy.a2014011385.helpers.CallBack;
 import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
+import com.squareup.picasso.Picasso;
 
 public class NewsActivity extends AppCompatActivity {
 
@@ -60,20 +61,14 @@ public class NewsActivity extends AppCompatActivity {
             // TODO: fix the bug of not WebView displaying the web thoroughly on API24
             contentWebView.loadUrl(news.getSourceURL()); // set content
 
-            final ImageView image = (ImageView) findViewById(R.id.image);
+            ImageView imageView = (ImageView) findViewById(R.id.image);
             if (news.getImageURLs() == null) {
-                image.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
+                imageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
                         R.drawable.ic_error_black_48dp));
             } else {
-                DataAccessor accessor = DataAccessor.getInstance();
-                accessor.setContext(getApplicationContext());
-                accessor.getImage(news.getImageURLs()[0], new CallBack<ImageLoader.ImageContainer>() {
-                    @Override
-                    public void onCallBack(ImageLoader.ImageContainer response) {
-                        image.setImageBitmap(response.getBitmap());
-                    }
-                });
+                Picasso.with(getApplicationContext()).load(news.getImageURLs()[0]).into(imageView);
             }
+
         } else {
             Log.w(NEWS_ACTIVITY_TAG, "News is NullPointer");
         }

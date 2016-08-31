@@ -21,6 +21,7 @@ import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
 import com.ihandy.a2014011385.helpers.ParseHelper;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -46,7 +47,6 @@ public class NewsListFragment extends Fragment {
     private final int GET_NEWS_LIST_MESSAGE_WHAT = 0;
     private final int GET_MORE_NEWS_MESSAGE_WHAT = 1;
 
-    private DataAccessor accessor = DataAccessor.getInstance();
     private RecyclerView newsRecyclerView;
     private ArrayList<News> newsArrayList;
 
@@ -109,10 +109,10 @@ public class NewsListFragment extends Fragment {
 
         DataAccessor accessor = DataAccessor.getInstance(); // get text information for each item
         accessor.setContext(getContext());
-        accessor.getNewsList(category, new CallBack<String>() {
+        accessor.getNewsList(category, new CallBack<ArrayList<News>>() {
             @Override
-            public void onCallBack(String response) {
-                newsArrayList = ParseHelper.parseNewsList(response);
+            public void onCallBack(ArrayList<News> response) {
+                newsArrayList = response;
                 Message message = new Message();
                 message.what = GET_NEWS_LIST_MESSAGE_WHAT;
                 handler.sendMessage(message);
