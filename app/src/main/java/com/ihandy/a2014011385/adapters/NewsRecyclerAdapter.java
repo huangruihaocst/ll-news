@@ -1,6 +1,8 @@
 package com.ihandy.a2014011385.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,7 +11,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.ihandy.a2014011385.NewsActivity;
 import com.ihandy.a2014011385.R;
+import com.ihandy.a2014011385.helpers.CallBack;
+import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
 
 import java.text.DateFormat;
@@ -34,6 +40,18 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
             timeTextView = (TextView) itemView.findViewById(R.id.time);
             sourceTextView = (TextView) itemView.findViewById(R.id.source);
             imageView = (ImageView) itemView.findViewById(R.id.image);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, NewsActivity.class);
+                    Bundle data = new Bundle();
+                    data.putSerializable(context.getString(R.string.key_main_news),
+                            newsArrayList.get(getAdapterPosition()));
+                    intent.putExtras(data);
+                    context.startActivity(intent);
+                }
+            });
         }
     }
 
@@ -58,11 +76,29 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         timeTextView.setText(formatter.format(date));
         sourceTextView.setText(news.getSourceName());
-        imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_menu_camera));
+        // TODO: fix the bug of not displaying images at the correct place
+        if (news.getImageURLs() == null) {
+            imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_error_black_48dp));
+        } else {
+            DataAccessor accessor = DataAccessor.getInstance();
+            accessor.setContext(context);
+            accessor.getImage(news.getImageURLs()[0], new CallBack<ImageLoader.ImageContainer>() {
+                @Override
+                public void onCallBack(ImageLoader.ImageContainer response) {
+                    imageView.setImageBitmap(response.getBitmap());
+                }
+            });
+        }
+
     }
 
     @Override
     public int getItemCount() {
         return newsArrayList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 }

@@ -59,7 +59,8 @@ public class NewsListFragment extends Fragment {
             // TODO: add real handling of message
             switch (message.what) {
                 case GET_NEWS_LIST_MESSAGE_WHAT:
-                    newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(), newsArrayList));
+                    newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(),
+                            newsArrayList));
                     break;
                 case GET_MORE_NEWS_MESSAGE_WHAT:
                     Toast.makeText(getContext(), "get more news done", Toast.LENGTH_LONG).show();
@@ -106,7 +107,7 @@ public class NewsListFragment extends Fragment {
         newsRecyclerView = (RecyclerView) root.findViewById(R.id.list);
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        DataAccessor accessor = DataAccessor.getInstance();
+        DataAccessor accessor = DataAccessor.getInstance(); // get text information for each item
         accessor.setContext(getContext());
         accessor.getNewsList(category, new CallBack<String>() {
             @Override

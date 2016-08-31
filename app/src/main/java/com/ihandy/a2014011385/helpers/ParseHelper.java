@@ -1,7 +1,6 @@
 package com.ihandy.a2014011385.helpers;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +41,11 @@ public class ParseHelper {
             news.country = newsObject.getString("country");
             news.fetchedTime = newsObject.getLong("fetched_time");
             if (!newsObject.isNull("imgs")) {
-                news.imageURLs = toStringArray(newsObject.getJSONArray("imgs"));
+                JSONArray imageUrlArray = newsObject.getJSONArray("imgs");
+                news.imageURLs = new String[imageUrlArray.length()];
+                for (int i = 0; i < imageUrlArray.length(); ++i) {
+                    news.imageURLs[i] = imageUrlArray.getJSONObject(i).getString("url");
+                }
             } else {
                 news.imageURLs = null;
             }

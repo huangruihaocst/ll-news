@@ -6,12 +6,13 @@ import android.util.Log;
 
 import org.json.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by huangruihao on 16-8-27.
  */
-public class News {
+public class News implements Serializable{
     String category;
     String country;
     long fetchedTime; // timestamp
@@ -76,10 +77,5 @@ public class News {
     }
     public long getUpdatedTime() {
         return updatedTime;
-    }
-
-    public Image[] getImages() {
-        // TODO: add real getImages method
-        return null;
     }
 }

@@ -2,12 +2,14 @@ package com.ihandy.a2014011385.helpers;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.LruCache;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.ihandy.a2014011385.R;
@@ -75,5 +77,19 @@ public class DataAccessor {
         queue.add(stringRequest);
     }
 
-    public News getNews(long ID) {return null;}
+    public void getImage(String url, final CallBack<ImageLoader.ImageContainer> callBack) {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        ImageLoader loader = new ImageLoader(queue, new LruBitmapCache());
+        loader.get(url, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                callBack.onCallBack(response);
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(DATA_ACCESSOR_TAG, error.getMessage());
+            }
+        });
+    }
 }
