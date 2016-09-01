@@ -17,5 +17,12 @@ public class Cache {
         return ourInstance;
     }
 
+    boolean newListIsAvaliable(String categoryName) {
+        return newsArrayListHashMap != null
+                && newsArrayListHashMap.size() != 0
+                && newsArrayListHashMap.get(categoryName)!= null
+                && newsArrayListHashMap.get(categoryName).size() != 0;
+    }
+
     private Cache() {}
 }

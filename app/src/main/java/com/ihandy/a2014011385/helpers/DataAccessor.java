@@ -50,41 +50,34 @@ public class DataAccessor {
         if (cache.categories != null && cache.categories.length != 0) { // successfully get categories from memory
             callBack.onCallBack(cache.categories);
         } else { // nothing in memory, try to access from database (the second level of cache: from database)
-            boolean isInDatabase = false;
-            try {
-                List<Category> categoryList = Select.from(Category.class).list();
-                if (categoryList != null && categoryList.size() != 0) {
-                    isInDatabase = true;
-                    Category[] categories = toCategoryArray(categoryList);
-                    callBack.onCallBack(categories);
-                }
-            } catch (SQLiteException e) {
-                Log.i(DATA_ACCESSOR_TAG, e.getMessage());
-            } finally {
-                if (!isInDatabase) { // nothing in database, try to access from the Internet
-                    RequestQueue queue = Volley.newRequestQueue(context);
-                    String url = GET_CATEGORIES_URL + timestamp;
-                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Category[] categories = ParseHelper.parseCategories(response);
+            List<Category> categoryList = Select.from(Category.class).list();
+            if (categoryList != null && categoryList.size() != 0) {
+                Category[] categories = toCategoryArray(categoryList);
+                cache.categories = categories;
+                callBack.onCallBack(categories);
+            } else { // nothing in database, try to access from the Internet
+                RequestQueue queue = Volley.newRequestQueue(context);
+                String url = GET_CATEGORIES_URL + timestamp;
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Category[] categories = ParseHelper.parseCategories(response);
 
-                            cache.categories = categories; // refresh the first level of cache
-                            for (Category category: categories) {
-                                category.save(); // refresh the second level of cache
-                            }
+                        cache.categories = categories; // refresh the first level of cache
+                        for (Category category: categories) {
+                            category.save(); // refresh the second level of cache
+                        }
 
-                            callBack.onCallBack(categories);
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
-                            Toast.makeText(context, context.getString(R.string.network_error), Toast.LENGTH_LONG).show();
-                            Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
-                        }
-                    });
-                    queue.add(stringRequest);
-                }
+                        callBack.onCallBack(categories);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
+                        Toast.makeText(context, context.getString(R.string.network_error), Toast.LENGTH_LONG).show();
+                        Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
+                    }
+                });
+                queue.add(stringRequest);
             }
         }
     }
@@ -93,86 +86,43 @@ public class DataAccessor {
         // TODO: handle amount of news
         // the first level of cache: from memory
         final Cache cache = Cache.getInstance();
-        if (cache.newsArrayListHashMap != null
-                && cache.newsArrayListHashMap.size() != 0
-                && cache.newsArrayListHashMap.get(categoryName)!= null
-                && cache.newsArrayListHashMap.get(categoryName).size() != 0) {
+        if (cache.newListIsAvaliable(categoryName)) {
             Log.w(DATA_ACCESSOR_TAG, String.valueOf(cache.newsArrayListHashMap.get(categoryName).size()) + " from cache");
             callBack.onCallBack(cache.newsArrayListHashMap.get(categoryName));
-        } else {
-            boolean isInDatabase = false;
-//            try {
-//                List<News> newsList = Select.from(News.class)
-//                        .where(Condition.prop("category_name").eq(categoryName))
-//                        .orderBy("news_id").list();
-//                Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsList.size()) + " from database");
-//                if (newsList != null && newsList.size() != 0) {
-//                    isInDatabase = true;
-//                    callBack.onCallBack(new ArrayList<>(newsList));
-//                }
-//            } catch (SQLiteException e) {
-//                Log.i(DATA_ACCESSOR_TAG, e.getMessage());
-//            } finally {
-//                if (!isInDatabase) { // nothing in database, try to access from the Internet
-//                    RequestQueue queue = Volley.newRequestQueue(context);
-//                    String url = GET_NEWS_LIST_URL.replace("<category>", categoryName); // ignore <max_news_id>
-//                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-//                            new Response.Listener<String>() {
-//                        @Override
-//                        public void onResponse(String response) {
-//                            ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
-//                            Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsArrayList.size()) + " from Internet");
-//                            cache.newsArrayListHashMap.put(categoryName, newsArrayList); // refresh the first level of cache
-//                            for (News news: newsArrayList) { // refresh the second level of cache
-//                                news.save();
-//                            }
-//                            callBack.onCallBack(newsArrayList);
-//                        }
-//                    }, new Response.ErrorListener() {
-//                        @Override
-//                        public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
-//                            Toast.makeText(context, context.getString(R.string.network_error),
-//                                    Toast.LENGTH_LONG).show();
-//                            Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
-//                            callBack.onCallBack(null);
-//                        }
-//                    });
-//                    queue.add(stringRequest);
-//                }
-//            }
+        } else { // nothing in cache, access from database (the second level of cache: database)
             List<News> newsList = Select.from(News.class)
                     .where(Condition.prop("category_name").eq(categoryName))
                     .orderBy("news_id").list();
             Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsList.size()) + " from database");
-//            if (newsList != null && newsList.size() != 0) {
-//                isInDatabase = true;
-//                callBack.onCallBack(new ArrayList<>(newsList));
-//            } else {
-//                RequestQueue queue = Volley.newRequestQueue(context);
-//                String url = GET_NEWS_LIST_URL.replace("<category>", categoryName); // ignore <max_news_id>
-//                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-//                        new Response.Listener<String>() {
-//                            @Override
-//                            public void onResponse(String response) {
-//                                ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
-//                                Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsArrayList.size()) + " from Internet");
-//                                cache.newsArrayListHashMap.put(categoryName, newsArrayList); // refresh the first level of cache
-//                                for (News news: newsArrayList) { // refresh the second level of cache
-//                                    news.save();
-//                                }
-//                                callBack.onCallBack(newsArrayList);
-//                            }
-//                        }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
-//                        Toast.makeText(context, context.getString(R.string.network_error),
-//                                Toast.LENGTH_LONG).show();
-//                        Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
-//                        callBack.onCallBack(null);
-//                    }
-//                });
-//                queue.add(stringRequest);
-//            }
+            if (newsList != null && newsList.size() != 0) {
+                cache.newsArrayListHashMap.put(categoryName, new ArrayList<>(newsList));
+                callBack.onCallBack(new ArrayList<>(newsList));
+            } else { // nothing in database, access from the Internet
+                RequestQueue queue = Volley.newRequestQueue(context);
+                String url = GET_NEWS_LIST_URL.replace("<category>", categoryName); // ignore <max_news_id>
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
+                                Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsArrayList.size()) + " from Internet");
+                                cache.newsArrayListHashMap.put(categoryName, newsArrayList); // refresh the first level of cache
+                                for (News news: newsArrayList) { // refresh the second level of cache
+                                    news.save();
+                                }
+                                callBack.onCallBack(newsArrayList);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
+                        Toast.makeText(context, context.getString(R.string.network_error),
+                                Toast.LENGTH_LONG).show();
+                        Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
+                        callBack.onCallBack(null);
+                    }
+                });
+                queue.add(stringRequest);
+            }
         }
     }
 
@@ -197,8 +147,6 @@ public class DataAccessor {
                         int old = cache.newsArrayListHashMap.get(categoryName).size();
                         removeAll(cache.newsArrayListHashMap.get(categoryName), newsArrayList);
                         cache.newsArrayListHashMap.get(categoryName).addAll(newsArrayList);
-                        Toast.makeText(context, "1:" + String.valueOf(cache.newsArrayListHashMap.get(categoryName).size()
-                        - old), Toast.LENGTH_LONG).show();
                         // newses have to be in the right order
                         Collections.sort(cache.newsArrayListHashMap.get(categoryName), new Comparator<News>() {
                             @Override
@@ -213,7 +161,6 @@ public class DataAccessor {
                         List<News> existsList = Select.from(News.class)
                                 .where(Condition.prop("category_name").eq(categoryName)).list();
                         removeAll(newsArrayList, new ArrayList<>(existsList));
-                        Toast.makeText(context, "2: " + String.valueOf(newsArrayList.size()), Toast.LENGTH_LONG).show();
                         for (News news: newsArrayList) { // add news that does not exist in the database
                             news.save();
                         }
