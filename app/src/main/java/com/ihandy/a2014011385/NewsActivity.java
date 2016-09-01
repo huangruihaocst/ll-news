@@ -15,11 +15,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
-import com.android.volley.toolbox.ImageLoader;
-import com.ihandy.a2014011385.helpers.CallBack;
-import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 public class NewsActivity extends AppCompatActivity {
 
@@ -62,13 +62,18 @@ public class NewsActivity extends AppCompatActivity {
             contentWebView.loadUrl(news.getSourceURL()); // set content
 
             ImageView imageView = (ImageView) findViewById(R.id.image);
-            if (news.getImageURLs() == null) {
+            if (news.getImageURLsJSON() != null) {
+                try {
+                    JSONArray imageURLs = new JSONArray(news.getImageURLsJSON());
+                    Picasso.with(getApplicationContext()).
+                            load(imageURLs.getJSONObject(0).getString("url")).into(imageView);
+                } catch (JSONException e) {
+                    Log.e(NEWS_ACTIVITY_TAG, e.getMessage());
+                }
+            } else {
                 imageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
                         R.drawable.ic_error_black_48dp));
-            } else {
-                Picasso.with(getApplicationContext()).load(news.getImageURLs()[0]).into(imageView);
             }
-
         } else {
             Log.w(NEWS_ACTIVITY_TAG, "News is NullPointer");
         }

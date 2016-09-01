@@ -19,9 +19,7 @@ import com.ihandy.a2014011385.adapters.NewsRecyclerAdapter;
 import com.ihandy.a2014011385.helpers.CallBack;
 import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
-import com.ihandy.a2014011385.helpers.ParseHelper;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -35,10 +33,10 @@ import java.util.ArrayList;
 public class NewsListFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String CATEGORY = "category";
+    private static final String CATEGORY_NAME = "categoryName";
 
     // TODO: Rename and change types of parameters
-    private String category;
+    private String categoryName;
 
     private OnFragmentInteractionListener mListener;
 
@@ -79,14 +77,14 @@ public class NewsListFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param category The category of the news list.
+     * @param category The categoryName of the news list.
      * @return A new instance of fragment NewsListFragment.
      */
     // TODO: Rename and change types and number of parameters
     public static NewsListFragment newInstance(String category) {
         NewsListFragment fragment = new NewsListFragment();
         Bundle args = new Bundle();
-        args.putString(CATEGORY, category);
+        args.putString(CATEGORY_NAME, category);
         fragment.setArguments(args);
         return fragment;
     }
@@ -95,7 +93,7 @@ public class NewsListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            category = getArguments().getString(CATEGORY);
+            categoryName = getArguments().getString(CATEGORY_NAME);
         }
     }
 
@@ -109,7 +107,7 @@ public class NewsListFragment extends Fragment {
 
         DataAccessor accessor = DataAccessor.getInstance(); // get text information for each item
         accessor.setContext(getContext());
-        accessor.getNewsList(category, new CallBack<ArrayList<News>>() {
+        accessor.getNewsList(categoryName, new CallBack<ArrayList<News>>() {
             @Override
             public void onCallBack(ArrayList<News> response) {
                 newsArrayList = response;

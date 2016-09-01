@@ -7,9 +7,9 @@ import java.util.HashMap;
  * Created by huangruihao on 16-8-31.
  */
 public class Cache {
-    HashMap<String, String> categories;
+    Category[] categories;
 
-    ArrayList<News> newsArrayList;
+    HashMap<String, ArrayList<News>> newsArrayList = new HashMap<>();
 
     private static Cache ourInstance = new Cache();
 

@@ -5,19 +5,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.ihandy.a2014011385.NewsActivity;
 import com.ihandy.a2014011385.R;
-import com.ihandy.a2014011385.helpers.CallBack;
-import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,8 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
     TextView timeTextView;
     TextView sourceTextView;
     ImageView imageView;
+
+    private final String NEWS_RECYCLER_VIEW_TAG = "NewsRecyclerAdapter";
 
     class NewsViewHolder extends RecyclerView.ViewHolder {
         public NewsViewHolder(View itemView) {
@@ -77,13 +80,16 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         timeTextView.setText(formatter.format(date));
         sourceTextView.setText(news.getSourceName());
-        // TODO: fix the bug of not displaying images at the correct place
-        if (news.getImageURLs() == null) {
-            imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_error_black_48dp));
+        if (news.getImageURLsJSON() != null) {
+            try {
+                JSONArray imageURLs = new JSONArray(news.getImageURLsJSON());
+                Picasso.with(context).load(imageURLs.getJSONObject(0).getString("url")).into(imageView);
+            } catch (JSONException e) {
+                Log.e(NEWS_RECYCLER_VIEW_TAG, e.getMessage());
+            }
         } else {
-            Picasso.with(context).load(news.getImageURLs()[0]).into(imageView);
+            imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_error_black_48dp));
         }
-
     }
 
     @Override

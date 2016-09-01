@@ -1,6 +1,5 @@
 package com.ihandy.a2014011385;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,15 +23,11 @@ import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
 import com.ihandy.a2014011385.fragments.NewsListFragment;
 import com.ihandy.a2014011385.helpers.*;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         NewsListFragment.OnFragmentInteractionListener {
 
-    HashMap<String, String> categories;
+    Category[] categories;
 
     private final int GET_CATEGORIES_MESSAGE_WHAT = 0;
 
@@ -73,12 +68,9 @@ public class MainActivity extends AppCompatActivity
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case GET_CATEGORIES_MESSAGE_WHAT:
-                        Iterator iterator = categories.entrySet().iterator();
-                        while(iterator.hasNext()) {
-                            Map.Entry entry = (Map.Entry) iterator.next();
-                            adapter.addFragment(NewsListFragment.newInstance(
-                                    (String)entry.getKey()), (String)entry.getValue());
-                            iterator.remove();
+                        for (Category category: categories) {
+                            adapter.addFragment(NewsListFragment.newInstance(category.name),
+                                    category.title);
                         }
                         break;
                     default:
@@ -89,9 +81,9 @@ public class MainActivity extends AppCompatActivity
 
         DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getApplicationContext());
-        accessor.getCategories(System.currentTimeMillis(), new CallBack<HashMap<String, String>>() {
+        accessor.getCategories(System.currentTimeMillis(), new CallBack<Category[]>() {
             @Override
-            public void onCallBack(HashMap<String, String> response) {
+            public void onCallBack(Category[] response) {
                 categories = response;
                 Message message = new Message();
                 message.what = GET_CATEGORIES_MESSAGE_WHAT;

@@ -1,52 +1,33 @@
 package com.ihandy.a2014011385.helpers;
 
-import android.content.Context;
-import android.media.Image;
-import android.util.Log;
-
-import org.json.*;
+import com.orm.SugarRecord;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * Created by huangruihao on 16-8-27.
  */
-public class News implements Serializable{
-    String category;
+public class News extends SugarRecord implements Serializable{
+    String categoryName;
     String country;
     long fetchedTime; // timestamp
-    String[] imageURLs;
-    long ID;
+    String imageURLsJSON; // in order to store in database with SugarORM
+    long newsId;
     String origin;
     long[] relativeNews; // the IDs of relative news
     String sourceName;
     String sourceURL;
     String title;
     long updatedTime; // timestamp
-    Context context;
 
     private final String NEWS_TAG = "News";
-
-    public News() {
-        // Required empty public constructor
-    }
 
     public News(String newsJSON) { // DataAccessor has permit the newsJSON to be valid
         ParseHelper.parseNews(this, newsJSON);
     }
 
-    public static News newSimpleNewsInstance(Context context, String title, long time, String sourceURL) {
-        News simpleNews = new News();
-        simpleNews.context = context;
-        simpleNews.title = title;
-        simpleNews.fetchedTime = time;
-        simpleNews.sourceURL = sourceURL;
-        return simpleNews;
-    }
-
-    public String getCategory() {
-        return category;
+    public String getCategoryName() {
+        return categoryName;
     }
     public String getCountry() {
         return country;
@@ -54,11 +35,11 @@ public class News implements Serializable{
     public long getFetchedTime() {
         return fetchedTime;
     }
-    public String[] getImageURLs() {
-        return imageURLs;
+    public String getImageURLsJSON() {
+        return imageURLsJSON;
     }
-    public long getID() {
-        return ID;
+    public long getNewsId() {
+        return newsId;
     }
     public String getOrigin() {
         return origin;

@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 /**
@@ -17,8 +16,8 @@ public class ParseHelper {
 
     private final static String PARSE_HELPER_TAG = "ParseHelper";
 
-    public static HashMap<String, String> parseCategoriesHashMap(String categoriesJSON) {
-        HashMap<String, String> categories = new HashMap<>();
+    public static Category[] parseCategories(String categoriesJSON) {
+        ArrayList<Category> categories = new ArrayList<>();
         try {
             JSONObject responseObject = new JSONObject(categoriesJSON);
             JSONObject dataObject = responseObject.getJSONObject("data"); // volley permits the status code to be 200
@@ -26,30 +25,29 @@ public class ParseHelper {
             Iterator<String> categoriesIterator = categoriesObject.keys();
             while (categoriesIterator.hasNext()) {
                 String key = categoriesIterator.next();
-                categories.put(key, categoriesObject.getString(key));
+                categories.add(new Category(key, categoriesObject.getString(key)));
             }
         } catch (JSONException e) {
             Log.e(PARSE_HELPER_TAG, e.getMessage());
         }
-        return categories;
+
+        return toCategoryArray(categories);
     }
 
     public static void parseNews(News news, String newsJSON) {
         try {
             JSONObject newsObject = new JSONObject(newsJSON);
-            news.category = newsObject.getString("category");
+            news.categoryName = newsObject.getString("category");
             news.country = newsObject.getString("country");
             news.fetchedTime = newsObject.getLong("fetched_time");
             if (!newsObject.isNull("imgs")) {
                 JSONArray imageUrlArray = newsObject.getJSONArray("imgs");
-                news.imageURLs = new String[imageUrlArray.length()];
-                for (int i = 0; i < imageUrlArray.length(); ++i) {
-                    news.imageURLs[i] = imageUrlArray.getJSONObject(i).getString("url");
-                }
+                news.imageURLsJSON = imageUrlArray.toString();
+                Log.i("123456", news.imageURLsJSON);
             } else {
-                news.imageURLs = null;
+                news.imageURLsJSON = null;
             }
-            news.ID = newsObject.getLong("news_id");
+            news.newsId = newsObject.getLong("news_id");
             news.origin = newsObject.getString("origin");
             if (!newsObject.isNull("relative_news")) {
                 news.relativeNews = toLongArray(newsObject.getJSONArray("relative_news"));
@@ -82,19 +80,19 @@ public class ParseHelper {
         return newsArrayList;
     }
 
-    private static String[] toStringArray(JSONArray jsonArray) throws JSONException{
-        String[] stringArray = new String[jsonArray.length()];
-        for (int i = 0; i < jsonArray.length(); ++i) {
-            stringArray[i] = jsonArray.getString(i);
-        }
-        return stringArray;
-    }
-
     private static long[] toLongArray(JSONArray jsonArray) throws JSONException{
         long[] longArray = new long[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); ++i) {
             longArray[i] = jsonArray.getLong(i);
         }
         return longArray;
+    }
+
+    static Category[] toCategoryArray(ArrayList<Category> categoryArrayList) {
+        Category[] categories = new Category[categoryArrayList.size()];
+        for (int i = 0; i < categories.length; ++i) {
+            categories[i] = categoryArrayList.get(i);
+        }
+        return categories;
     }
 }
