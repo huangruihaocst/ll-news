@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Created by huangruihao on 16-8-27.
  */
-public class News extends SugarRecord implements Serializable{
+public class News extends SugarRecord implements Serializable {
     String categoryName;
     String country;
     long fetchedTime; // timestamp
@@ -21,6 +21,8 @@ public class News extends SugarRecord implements Serializable{
     long updatedTime; // timestamp
 
     private final String NEWS_TAG = "News";
+
+    public News() {}
 
     public News(String newsJSON) { // DataAccessor has permit the newsJSON to be valid
         ParseHelper.parseNews(this, newsJSON);

@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class Cache {
     Category[] categories;
 
-    HashMap<String, ArrayList<News>> newsArrayList = new HashMap<>();
+    HashMap<String, ArrayList<News>> newsArrayListHashMap = new HashMap<>();
 
     private static Cache ourInstance = new Cache();
 

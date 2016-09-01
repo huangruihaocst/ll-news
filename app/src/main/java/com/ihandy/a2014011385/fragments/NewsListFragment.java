@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,11 +33,9 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class NewsListFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String CATEGORY_NAME = "categoryName";
 
-    // TODO: Rename and change types of parameters
     private String categoryName;
 
     private OnFragmentInteractionListener mListener;
@@ -43,10 +43,12 @@ public class NewsListFragment extends Fragment {
     private final String NEWS_LIST_FRAGMENT_TAG = "NewsListFragment";
 
     private final int GET_NEWS_LIST_MESSAGE_WHAT = 0;
-    private final int GET_MORE_NEWS_MESSAGE_WHAT = 1;
+    private final int REFRESH_MESSAGE_WHAT = 1;
+    private final int GET_MORE_NEWS_MESSAGE_WHAT = 2;
 
     private RecyclerView newsRecyclerView;
     private ArrayList<News> newsArrayList;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     /**
      * Handle UI conduction when a message comes.
@@ -54,12 +56,17 @@ public class NewsListFragment extends Fragment {
     Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message message) {
-            // TODO: add real handling of message
             switch (message.what) {
                 case GET_NEWS_LIST_MESSAGE_WHAT:
                     newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(),
                             newsArrayList));
                     break;
+                case REFRESH_MESSAGE_WHAT:
+                    newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(),
+                            newsArrayList));
+                    swipeRefreshLayout.setRefreshing(false);
+                    break;
+                // TODO: handle getting more news
                 case GET_MORE_NEWS_MESSAGE_WHAT:
                     Toast.makeText(getContext(), "get more news done", Toast.LENGTH_LONG).show();
                     break;
@@ -105,15 +112,40 @@ public class NewsListFragment extends Fragment {
         newsRecyclerView = (RecyclerView) root.findViewById(R.id.list);
         newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        DataAccessor accessor = DataAccessor.getInstance(); // get text information for each item
+        final DataAccessor accessor = DataAccessor.getInstance(); // get text information for each item
         accessor.setContext(getContext());
         accessor.getNewsList(categoryName, new CallBack<ArrayList<News>>() {
             @Override
             public void onCallBack(ArrayList<News> response) {
-                newsArrayList = response;
-                Message message = new Message();
-                message.what = GET_NEWS_LIST_MESSAGE_WHAT;
-                handler.sendMessage(message);
+                if (response == null) {
+                    // accessing failed, nothing done
+                } else {
+                    newsArrayList = response;
+                    Message message = new Message();
+                    message.what = GET_NEWS_LIST_MESSAGE_WHAT;
+                    handler.sendMessage(message);
+                }
+            }
+        });
+
+        swipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                accessor.forceAccessFromInternet(categoryName, new CallBack<ArrayList<News>>() {
+                    @Override
+                    public void onCallBack(ArrayList<News> response) {
+                        if (response == null) { // refreshing failed, simply stop button spinning
+                            swipeRefreshLayout.setRefreshing(false);
+                        } else {
+                            newsArrayList = response;
+                            Message message = new Message();
+                            message.what = REFRESH_MESSAGE_WHAT;
+                            handler.sendMessage(message);
+                        }
+                    }
+                });
             }
         });
 
