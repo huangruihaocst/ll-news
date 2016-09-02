@@ -37,8 +37,14 @@ public class NewsListFragment extends Fragment {
     private static final String CATEGORY_NAME = "categoryName";
 
     private String categoryName;
+    private boolean isLoading = false;
+    private boolean noMore = false;
+    private int visibleThreshold = 2;
+    private int newsListLength = 0;
 
     private OnFragmentInteractionListener mListener;
+
+    private NewsRecyclerAdapter adapter;
 
     private final String NEWS_LIST_FRAGMENT_TAG = "NewsListFragment";
 
@@ -58,17 +64,21 @@ public class NewsListFragment extends Fragment {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case GET_NEWS_LIST_MESSAGE_WHAT:
-                    newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(),
-                            newsArrayList));
+                    adapter = new NewsRecyclerAdapter(getContext(), newsArrayList);
+                    newsRecyclerView.setAdapter(adapter);
+                    newsListLength = newsArrayList.size();
                     break;
                 case REFRESH_MESSAGE_WHAT:
-                    newsRecyclerView.setAdapter(new NewsRecyclerAdapter(getContext(),
-                            newsArrayList));
+                    adapter = new NewsRecyclerAdapter(getContext(), newsArrayList);
+                    newsRecyclerView.setAdapter(adapter);
                     swipeRefreshLayout.setRefreshing(false);
+                    newsListLength = newsArrayList.size();
                     break;
-                // TODO: handle getting more news
                 case GET_MORE_NEWS_MESSAGE_WHAT:
-                    Toast.makeText(getContext(), "get more news done", Toast.LENGTH_LONG).show();
+                    adapter.notifyItemInserted(newsListLength - 1);
+                    adapter.notifyDataSetChanged();
+                    newsListLength = newsArrayList.size();
+                    isLoading = false;
                     break;
                 default:
                     // nothing will be done
@@ -110,7 +120,8 @@ public class NewsListFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_news_list, container, false);
         newsRecyclerView = (RecyclerView) root.findViewById(R.id.list);
-        newsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        newsRecyclerView.setLayoutManager(layoutManager);
 
         final DataAccessor accessor = DataAccessor.getInstance(); // get text information for each item
         accessor.setContext(getContext());
@@ -146,6 +157,37 @@ public class NewsListFragment extends Fragment {
                         }
                     }
                 });
+            }
+        });
+
+        newsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int totalItemCount = layoutManager.getItemCount();
+                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                if (!isLoading && !noMore && totalItemCount <= lastVisibleItem + visibleThreshold) {
+                    accessor.getMoreNews(categoryName, new CallBack<ArrayList<News>>() {
+                        @Override
+                        public void onCallBack(ArrayList<News> response) {
+                            if (response == null) {
+                                // access failed, stop loading and allow a second try
+                                isLoading = false;
+                            } else {
+                                if (response.size() == newsArrayList.size()) { // nothing news
+                                    noMore = true;
+                                } else {
+                                    newsArrayList = response;
+                                    Message message = new Message();
+                                    message.what = GET_MORE_NEWS_MESSAGE_WHAT;
+                                    handler.sendMessage(message);
+                                }
+                            }
+                        }
+                    });
+                    isLoading = true;
+                }
             }
         });
 

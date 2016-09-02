@@ -1,7 +1,6 @@
 package com.ihandy.a2014011385.helpers;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,7 +28,7 @@ public class DataAccessor {
 
     private final String DATA_ACCESSOR_TAG = "DataAccessor";
     private final String GET_CATEGORIES_URL = "http://assignment.crazz.cn/news/en/category?timestamp=";
-//    private final String GET_NEWS_LIST_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>&max_news_id=";
+    private final String GET_MORE_NEWS_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>&max_news_id=";
     private final String GET_NEWS_LIST_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>";
 
     private static DataAccessor ourInstance = new DataAccessor();
@@ -82,18 +81,29 @@ public class DataAccessor {
         }
     }
 
+    /**
+     * When reading from cache, read all the news from it. (As long as the process is not killed, they are there)
+     * When reading from database, read all the news from it. They were saved to database before when they were gotten from the Internet.
+     * When reading from the Internet, get <item_count> of news (we do not know its value). It is called only once when the user first open the application.
+     * For further latest news, forceAccessFromInternet will get more news and save them to database.
+     * For further past news, getMoreNews() will get more past news  and save them to database.
+     * No matter how news are saved to database, they are displayed in the reverse chronological order.
+     * @param categoryName the name of the category (not title)
+     * @param callBack need to override onCallBack
+     */
     public void getNewsList(final String categoryName, final CallBack<ArrayList<News>> callBack) {
         // TODO: handle amount of news
         // the first level of cache: from memory
         final Cache cache = Cache.getInstance();
         if (cache.newListIsAvaliable(categoryName)) {
-            Log.w(DATA_ACCESSOR_TAG, String.valueOf(cache.newsArrayListHashMap.get(categoryName).size()) + " from cache");
+            Log.w(DATA_ACCESSOR_TAG, "first: " + String.valueOf(cache.newsArrayListHashMap.get(categoryName).size()) + " from cache");
             callBack.onCallBack(cache.newsArrayListHashMap.get(categoryName));
         } else { // nothing in cache, access from database (the second level of cache: database)
             List<News> newsList = Select.from(News.class)
                     .where(Condition.prop("category_name").eq(categoryName))
                     .orderBy("news_id").list();
-            Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsList.size()) + " from database");
+            Collections.reverse(newsList);
+            Log.w(DATA_ACCESSOR_TAG, "first: " + String.valueOf(newsList.size()) + " from database");
             if (newsList != null && newsList.size() != 0) {
                 cache.newsArrayListHashMap.put(categoryName, new ArrayList<>(newsList));
                 callBack.onCallBack(new ArrayList<>(newsList));
@@ -105,7 +115,17 @@ public class DataAccessor {
                             @Override
                             public void onResponse(String response) {
                                 ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
-                                Log.w(DATA_ACCESSOR_TAG, String.valueOf(newsArrayList.size()) + " from Internet");
+                                Collections.sort(newsArrayList, new Comparator<News>() {
+                                    @Override
+                                    public int compare(News n1, News n2) {
+                                        if (n1.newsId == n2.newsId){
+                                            return 0;
+                                        } else {
+                                            return n1.newsId < n2.newsId ? 1 : -1;
+                                        }
+                                    }
+                                });
+                                Log.w(DATA_ACCESSOR_TAG, "first: " + String.valueOf(newsArrayList.size()) + " from Internet");
                                 cache.newsArrayListHashMap.put(categoryName, newsArrayList); // refresh the first level of cache
                                 for (News news: newsArrayList) { // refresh the second level of cache
                                     news.save();
@@ -144,7 +164,6 @@ public class DataAccessor {
                     public void onResponse(String response) {
                         ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
                         // refresh the first level of cache, cache has to be bigger
-                        int old = cache.newsArrayListHashMap.get(categoryName).size();
                         removeAll(cache.newsArrayListHashMap.get(categoryName), newsArrayList);
                         cache.newsArrayListHashMap.get(categoryName).addAll(newsArrayList);
                         // newses have to be in the right order
@@ -173,6 +192,59 @@ public class DataAccessor {
                         Toast.LENGTH_LONG).show();
                 Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
                 callBack.onCallBack(null); // notify the caller that the refreshing failed
+            }
+        });
+        queue.add(stringRequest);
+    }
+
+    /**
+     * Get further past news, pass null to onCallBack if failed, the same ArrayList if no more news.
+     * @param categoryName the name of the category (not title)
+     * @param callBack need to override onCallBack
+     */
+    public void getMoreNews(final String categoryName, final CallBack<ArrayList<News>> callBack) {
+        final Cache cache = Cache.getInstance();
+        final List<News> existsList = Select.from(News.class)
+                .where(Condition.prop("category_name").eq(categoryName))
+                .orderBy("news_id").list();
+        long minNewsId = existsList.get(0).newsId;
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = GET_MORE_NEWS_URL.replace("<category>", categoryName) + minNewsId;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
+                        // refresh the first level of cache, cache has to be bigger
+                        removeAll(cache.newsArrayListHashMap.get(categoryName), newsArrayList);
+                        cache.newsArrayListHashMap.get(categoryName).addAll(newsArrayList);
+                        // newses have to be in the right order
+                        Collections.sort(cache.newsArrayListHashMap.get(categoryName), new Comparator<News>() {
+                            @Override
+                            public int compare(News n1, News n2) {
+                                if (n1.newsId == n2.newsId){
+                                    return 0;
+                                } else {
+                                    return n1.newsId < n2.newsId ? 1 : -1;
+                                }
+                            }
+                        });
+                        removeAll(newsArrayList, new ArrayList<>(existsList));
+                        Log.w(DATA_ACCESSOR_TAG, "more: " + String.valueOf(newsArrayList.size()) + " from Internet");
+                        for (News news: newsArrayList) { // add news that does not exist in the database
+                            news.save();
+                        }
+                        // pass the new list, already in the correct order
+                        callBack.onCallBack(cache.newsArrayListHashMap.get(categoryName));
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
+                Toast.makeText(context, context.getString(R.string.network_error),
+                        Toast.LENGTH_LONG).show();
+                Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
+                callBack.onCallBack(null);
             }
         });
         queue.add(stringRequest);
