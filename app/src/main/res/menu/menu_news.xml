@@ -3,8 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.ihandy.a2014011385.NewsActivity">
     <item
-        android:id="@+id/action_subscribe"
+        android:id="@+id/action_favorites"
         android:orderInCategory="100"
         android:title="@string/action_favorites"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_favorite_white_48dp"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_share"
+        android:orderInCategory="100"
+        android:title="@string/action_share"
+        android:icon="@drawable/ic_share_white_48dp"
+        app:showAsAction="ifRoom"
+        android:actionProviderClass="android.widget.ShareActionProvider"/>
 </menu>

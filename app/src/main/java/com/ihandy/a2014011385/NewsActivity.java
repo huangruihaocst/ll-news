@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -27,6 +28,8 @@ public class NewsActivity extends AppCompatActivity {
 
     private final String NEWS_ACTIVITY_TAG = "NewsActivity";
 
+    News news;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +38,7 @@ public class NewsActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Bundle data = intent.getExtras();
-        News news = (News) data.getSerializable(getString(R.string.key_main_news));
+        news = (News) data.getSerializable(getString(R.string.key_main_news));
 
         if (news != null) {
             toolbar.setTitle(news.getTitle()); // set title
@@ -106,7 +109,14 @@ public class NewsActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_subscribe) {
+        if (id == R.id.action_share) {
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, news.getSourceURL());
+            shareIntent.setType("text/plain");
+            startActivity(shareIntent);
+            return true;
+        } else if (id == R.id.action_favorites) {
             return true;
         }
 
