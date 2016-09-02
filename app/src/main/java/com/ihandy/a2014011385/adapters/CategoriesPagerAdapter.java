@@ -31,35 +31,18 @@ public class CategoriesPagerAdapter extends FragmentPagerAdapter {
     }
 
     /**
-     * Add fragment if the category does not exist
+     * Add fragment if the category does not exist.
      * @param fragment
      * @param category
      */
     public void addFragment(Fragment fragment, Category category) {
-        boolean isNews = true;
         for (Pair<Fragment, Category> pair: categoriesList) {
             if (pair.second.name.equals(category.name)) {
-                isNews = false;
+                return;
             }
         }
-        if (isNews) {
-            Pair<Fragment, Category> pair = new Pair<>(fragment, category);
-            categoriesList.add(pair);
-            notifyDataSetChanged();
-        }
-    }
-
-    /**
-     * Remove fragment if the category exists
-     * @param category
-     */
-    public void removeFragment(Category category) {
-        for (Pair<Fragment, Category> pair: categoriesList) {
-            if (pair.second.name.equals(category.name)) {
-                categoriesList.remove(pair);
-                notifyDataSetChanged();
-                break;
-            }
-        }
+        Pair<Fragment, Category> pair = new Pair<>(fragment, category);
+        categoriesList.add(pair);
+        notifyDataSetChanged();
     }
 }

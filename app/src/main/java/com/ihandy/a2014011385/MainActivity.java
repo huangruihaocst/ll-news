@@ -1,6 +1,7 @@
 package com.ihandy.a2014011385;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -162,13 +163,8 @@ public class MainActivity extends AppCompatActivity
                     for (Category category: categories) {
                         category.save();
                     }
-                    for (Category category: categories) {
-                        if (category.subscribing) { // should be add to TabLayout
-                            adapter.addFragment(NewsListFragment.newInstance(category.name), category);
-                        } else { // should not be add to TabLayout
-                            adapter.removeFragment(category);
-                        }
-                    }
+                    finish();
+                    startActivity(getIntent());
                 }
             }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                 @Override
