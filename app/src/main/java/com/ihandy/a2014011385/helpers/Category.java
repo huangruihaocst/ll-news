@@ -16,5 +16,11 @@ public class Category extends SugarRecord{
 
     public Category(){}
 
-    boolean following = true; // default: following
+    public boolean subscribing = true; // default: subscribing
+
+    public void copy(Category category) {
+        this.name = category.name;
+        this.title = category.title;
+        this.subscribing = category.subscribing;
+    }
 }

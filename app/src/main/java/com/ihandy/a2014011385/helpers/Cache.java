@@ -7,9 +7,9 @@ import java.util.HashMap;
  * Created by huangruihao on 16-8-31.
  */
 public class Cache {
-    Category[] categories;
+    public Category[] categories;
 
-    HashMap<String, ArrayList<News>> newsArrayListHashMap = new HashMap<>();
+    public HashMap<String, ArrayList<News>> newsArrayListHashMap = new HashMap<>();
 
     private static Cache ourInstance = new Cache();
 
@@ -17,7 +17,7 @@ public class Cache {
         return ourInstance;
     }
 
-    boolean newListIsAvaliable(String categoryName) {
+    boolean newListIsAvailable(String categoryName) {
         return newsArrayListHashMap != null
                 && newsArrayListHashMap.size() != 0
                 && newsArrayListHashMap.get(categoryName)!= null

@@ -95,7 +95,7 @@ public class DataAccessor {
         // TODO: handle amount of news
         // the first level of cache: from memory
         final Cache cache = Cache.getInstance();
-        if (cache.newListIsAvaliable(categoryName)) {
+        if (cache.newListIsAvailable(categoryName)) {
             Log.w(DATA_ACCESSOR_TAG, "first: " + String.valueOf(cache.newsArrayListHashMap.get(categoryName).size()) + " from cache");
             callBack.onCallBack(cache.newsArrayListHashMap.get(categoryName));
         } else { // nothing in cache, access from database (the second level of cache: database)

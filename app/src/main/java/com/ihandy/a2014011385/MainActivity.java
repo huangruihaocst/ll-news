@@ -1,5 +1,6 @@
 package com.ihandy.a2014011385;
 
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +10,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -23,13 +26,23 @@ import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
 import com.ihandy.a2014011385.fragments.NewsListFragment;
 import com.ihandy.a2014011385.helpers.*;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         NewsListFragment.OnFragmentInteractionListener {
 
+    DataAccessor accessor = DataAccessor.getInstance();
     Category[] categories;
+    CategoriesPagerAdapter adapter;
+    ViewPager pager;
+    TabLayout categoriesTabLayout;
 
     private final int GET_CATEGORIES_MESSAGE_WHAT = 0;
+
+    private final String MAIN_ACTIVITY_TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +69,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ViewPager pager = (ViewPager) findViewById(R.id.news_pager);
-        final CategoriesPagerAdapter adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
+        pager = (ViewPager) findViewById(R.id.news_pager);
+        adapter = new CategoriesPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
-        TabLayout categoriesTabLayout = (TabLayout) findViewById(R.id.categories_tabs);
+        categoriesTabLayout = (TabLayout) findViewById(R.id.categories_tabs);
         categoriesTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         categoriesTabLayout.setupWithViewPager(pager);
 
@@ -69,8 +82,9 @@ public class MainActivity extends AppCompatActivity
                 switch (msg.what) {
                     case GET_CATEGORIES_MESSAGE_WHAT:
                         for (Category category: categories) {
-                            adapter.addFragment(NewsListFragment.newInstance(category.name),
-                                    category.title);
+                            if (category.subscribing) {
+                                adapter.addFragment(NewsListFragment.newInstance(category.name), category);
+                            }
                         }
                         break;
                     default:
@@ -79,12 +93,15 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        DataAccessor accessor = DataAccessor.getInstance();
         accessor.setContext(getApplicationContext());
         accessor.getCategories(System.currentTimeMillis(), new CallBack<Category[]>() {
             @Override
             public void onCallBack(Category[] response) {
-                categories = response;
+                categories = new Category[response.length];
+                for (int i = 0; i < response.length; ++i) {
+                    categories[i] = new Category();
+                    categories[i].copy(response[i]);
+                }
                 Message message = new Message();
                 message.what = GET_CATEGORIES_MESSAGE_WHAT;
                 handler.sendMessage(message);
@@ -117,7 +134,53 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_subscribe) {
+            final String[] categoryTitles = new String[categories.length];
+            final boolean[] subscribingItems = new boolean[categories.length];
+            for (int i = 0; i < categories.length; ++i) {
+                categoryTitles[i] = categories[i].title;
+                subscribingItems[i] = categories[i].subscribing;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle(getString(R.string.action_subscribe))
+            .setMultiChoiceItems(categoryTitles, subscribingItems, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                    if (isChecked) {
+                        categories[which].subscribing = true;
+                    } else {
+                        categories[which].subscribing = false;
+                    }
+                }
+            }).setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Category.deleteAll(Category.class); // update category information
+                    Cache cache = Cache.getInstance();
+                    cache.categories = categories;
+                    for (Category category: categories) {
+                        category.save();
+                    }
+                    for (Category category: categories) {
+                        if (category.subscribing) { // should be add to TabLayout
+                            adapter.addFragment(NewsListFragment.newInstance(category.name), category);
+                        } else { // should not be add to TabLayout
+                            adapter.removeFragment(category);
+                        }
+                    }
+                }
+            }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Cache cache = Cache.getInstance();
+                    for (int i = 0; i < cache.categories.length; ++i) {
+                        categories[i].subscribing = cache.categories[i].subscribing;
+                    }
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
             return true;
         }
 
@@ -150,7 +213,5 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
+    public void onFragmentInteraction(Uri uri) {}
 }
