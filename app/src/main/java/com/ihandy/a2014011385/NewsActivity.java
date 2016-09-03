@@ -48,6 +48,16 @@ public class NewsActivity extends AppCompatActivity {
         if (news != null) {
             toolbar.setTitle(news.getTitle()); // set title
             setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowHomeEnabled(true);
+            }
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
 
             final WebView contentWebView = (WebView) findViewById(R.id.content);
             contentWebView.setWebViewClient(new WebViewClient() {
