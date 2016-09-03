@@ -154,6 +154,7 @@ public class NewsListFragment extends Fragment {
                             Message message = new Message();
                             message.what = REFRESH_MESSAGE_WHAT;
                             handler.sendMessage(message);
+                            Toast.makeText(getContext(), getString(R.string.refresh_success), Toast.LENGTH_LONG).show();
                         }
                     }
                 });

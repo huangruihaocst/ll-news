@@ -55,6 +55,7 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
                     data.putSerializable(context.getString(R.string.key_main_news),
                             newsArrayList.get(getAdapterPosition()));
                     intent.putExtras(data);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }
             });
