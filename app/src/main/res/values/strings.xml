@@ -116,4 +116,9 @@
     <string name="title_activity_favorites">FavoritesActivity</string>
 
     <string name="refresh_success">刷新成功</string>
+
+    <string name="title">标题</string>
+    <string name="picture">图片</string>
+    <string name="source">源网址</string>
+    <string name="no_picture">没有图片</string>
 </resources>

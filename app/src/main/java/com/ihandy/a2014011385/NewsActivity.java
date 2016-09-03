@@ -131,7 +131,21 @@ public class NewsActivity extends AppCompatActivity {
         if (id == R.id.action_share) {
             Intent shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_TEXT, news.getSourceURL());
+            String imageUrl = "";
+            if (news.getImageURLsJSON() != null) {
+                try {
+                    JSONArray imageUrls = new JSONArray(news.getImageURLsJSON());
+                    imageUrl = imageUrls.getJSONObject(0).getString("url");
+                } catch (JSONException e) {
+                    Log.e(NEWS_ACTIVITY_TAG, e.getMessage());
+                }
+            } else {
+                imageUrl = getString(R.string.no_picture);
+            }
+            String shareContent = getString(R.string.title) + ":" + news.getTitle() + " "
+                    + getString(R.string.source) + ":" + news.getSourceURL() + " " +
+                    getString(R.string.picture) + ":" + imageUrl;
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
             shareIntent.setType("text/plain");
             startActivity(shareIntent);
             return true;
