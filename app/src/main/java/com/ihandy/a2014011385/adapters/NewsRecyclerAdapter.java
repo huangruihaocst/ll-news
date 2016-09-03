@@ -63,7 +63,6 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
 
     private Context context;
     private ArrayList<News> newsArrayList;
-    private RecyclerView recyclerView;
 
     public NewsRecyclerAdapter(Context context, ArrayList<News> newsArrayList) {
         this.context = context;

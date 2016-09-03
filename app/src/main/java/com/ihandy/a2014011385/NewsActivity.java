@@ -17,12 +17,17 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.ihandy.a2014011385.helpers.News;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.util.List;
 
 public class NewsActivity extends AppCompatActivity {
 
@@ -98,6 +103,10 @@ public class NewsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_news, menu);
+        MenuItem item = menu.findItem(R.id.action_favorites);
+        if (news.isFavorite()){
+            item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_favorite_red_48dp));
+        }
         return true;
     }
 
@@ -117,6 +126,31 @@ public class NewsActivity extends AppCompatActivity {
             startActivity(shareIntent);
             return true;
         } else if (id == R.id.action_favorites) {
+            if (news.isFavorite()) { // change to not favorite
+                item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_favorite_white_48dp));
+                Toast.makeText(getApplicationContext(), getString(R.string.remove_from_favorites), Toast.LENGTH_LONG).show();
+                List<News> tempNewsList = Select.from(News.class).where(Condition.prop("news_id").eq(news.getNewsId())).list();
+                if (tempNewsList.size() != 0) { // actually it should be 1
+                    News tempNews = tempNewsList.get(0);
+                    tempNews.delete();
+                    news.toggleFavorite();
+                    news.save();
+                } else {
+                    Log.e(NEWS_ACTIVITY_TAG, "No news found in database");
+                }
+            } else { // change to favorite
+                item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_favorite_red_48dp));
+                Toast.makeText(getApplicationContext(), getString(R.string.add_to_favorites), Toast.LENGTH_LONG).show();
+                List<News> tempNewsList = Select.from(News.class).where(Condition.prop("news_id").eq(news.getNewsId())).list();
+                if (tempNewsList.size() != 0) { // actually it should be 1
+                    News tempNews = tempNewsList.get(0);
+                    tempNews.delete();
+                    news.toggleFavorite();
+                    news.save();
+                } else {
+                    Log.e(NEWS_ACTIVITY_TAG, "No news found in database");
+                }
+            }
             return true;
         }
 

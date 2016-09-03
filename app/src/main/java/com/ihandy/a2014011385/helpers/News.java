@@ -19,6 +19,7 @@ public class News extends SugarRecord implements Serializable {
     String sourceURL;
     String title;
     long updatedTime; // timestamp
+    boolean favorite = false; // default: not added to favorites
 
     private final String NEWS_TAG = "News";
 
@@ -60,5 +61,11 @@ public class News extends SugarRecord implements Serializable {
     }
     public long getUpdatedTime() {
         return updatedTime;
+    }
+    public boolean isFavorite(){
+        return favorite;
+    }
+    public void toggleFavorite() {
+        favorite = !favorite;
     }
 }
