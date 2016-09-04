@@ -53,5 +53,4 @@ public class FavoritesActivity extends AppCompatActivity {
         NewsRecyclerAdapter adapter = new NewsRecyclerAdapter(getApplicationContext(), new ArrayList<>(favoriteNewsList));
         favoritesRecyclerView.setAdapter(adapter);
     }
-
 }

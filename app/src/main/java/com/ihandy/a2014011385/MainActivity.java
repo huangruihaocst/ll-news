@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -30,6 +31,7 @@ import com.ihandy.a2014011385.helpers.*;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity
 
     private final String MAIN_ACTIVITY_TAG = "MainActivity";
 
+    TextToSpeech tts;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +62,33 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        // TODO Auto-generated method stub
+                        //TTS is successfully initialized
+                        if (status == TextToSpeech.SUCCESS) {
+                            //Setting speech language
+                            int result = tts.setLanguage(Locale.US);
+                            //If your device doesn't support language you set above
+                            if (result == TextToSpeech.LANG_MISSING_DATA
+                                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                //Cook simple toast message with message
+                                Log.e("TTS", "Language is not supported");
+                            }
+                            //Enable the button - It was disabled in main.xml (Go back and Check it)
+                            else {
+//                                btnSpeak.setEnabled(true);
+                            }
+                            //TTS is not initialized properly
+                        } else {
+                            Log.e("TTS", "Initilization Failed");
+                        }
+                    }
+                });
+                tts.speak("Text to say aloud", TextToSpeech.QUEUE_FLUSH, null);
+
             }
         });
 
@@ -192,7 +223,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_favorites) {
             Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_settings) {
 
         } else if (id == R.id.nav_slideshow) {
 

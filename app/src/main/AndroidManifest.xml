@@ -24,7 +24,11 @@
         <activity
             android:name=".NewsActivity"
             android:label="@string/title_activity_news"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".FavoritesActivity"
+            android:label="@string/title_activity_favorites"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="DATABASE"
@@ -38,11 +42,6 @@
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="com.ihandy.a2014011385.helpers" />
-
-        <activity
-            android:name=".FavoritesActivity"
-            android:label="@string/title_activity_favorites"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
