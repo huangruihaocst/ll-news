@@ -56,39 +56,29 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                // 如果装载TTS引擎成功
+                if (status == TextToSpeech.SUCCESS) {
+                    // 设置使用美式英语朗读
+                    int result = tts.setLanguage(Locale.US);
+                    // 如果不支持所设置的语言
+                    if (result != TextToSpeech.LANG_COUNTRY_AVAILABLE
+                            && result != TextToSpeech.LANG_AVAILABLE) {
+                    }
+                }
+            }
+        });
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
-                tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int status) {
-                        // TODO Auto-generated method stub
-                        //TTS is successfully initialized
-                        if (status == TextToSpeech.SUCCESS) {
-                            //Setting speech language
-                            int result = tts.setLanguage(Locale.US);
-                            //If your device doesn't support language you set above
-                            if (result == TextToSpeech.LANG_MISSING_DATA
-                                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                                //Cook simple toast message with message
-                                Log.e("TTS", "Language is not supported");
-                            }
-                            //Enable the button - It was disabled in main.xml (Go back and Check it)
-                            else {
-//                                btnSpeak.setEnabled(true);
-                            }
-                            //TTS is not initialized properly
-                        } else {
-                            Log.e("TTS", "Initilization Failed");
-                        }
-                    }
-                });
                 tts.speak("Text to say aloud", TextToSpeech.QUEUE_FLUSH, null);
-
             }
         });
 
@@ -242,4 +232,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onFragmentInteraction(Uri uri) {}
+
+    @Override
+    protected void onDestroy() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
 }
