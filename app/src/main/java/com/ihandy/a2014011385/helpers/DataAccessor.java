@@ -30,6 +30,7 @@ public class DataAccessor {
     private final String GET_CATEGORIES_URL = "http://assignment.crazz.cn/news/en/category?timestamp=";
     private final String GET_MORE_NEWS_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>&max_news_id=";
     private final String GET_NEWS_LIST_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>";
+    private final String SIMPLIFY_URL = "http://localhost:8080/readability/";
 
     private static DataAccessor ourInstance = new DataAccessor();
 
@@ -244,6 +245,27 @@ public class DataAccessor {
                 Toast.makeText(context, context.getString(R.string.network_error),
                         Toast.LENGTH_LONG).show();
                 Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.network_error));
+                callBack.onCallBack(null);
+            }
+        });
+        queue.add(stringRequest);
+    }
+
+    public void simplifyWebsite(String url, final CallBack<String> callBack) {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String requestUrl = SIMPLIFY_URL + url;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callBack.onCallBack(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
+                Toast.makeText(context, context.getString(R.string.simplify_error),
+                        Toast.LENGTH_LONG).show();
+                Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.simplify_error));
                 callBack.onCallBack(null);
             }
         });
