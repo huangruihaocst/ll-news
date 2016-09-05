@@ -7,7 +7,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -83,13 +82,7 @@ public class NewsActivity extends AppCompatActivity {
 
             ImageView imageView = (ImageView) findViewById(R.id.image);
             if (news.getImageURLsJSON() != null) {
-                try {
-                    JSONArray imageURLs = new JSONArray(news.getImageURLsJSON());
-                    Picasso.with(getApplicationContext()).
-                            load(imageURLs.getJSONObject(0).getString("url")).into(imageView);
-                } catch (JSONException e) {
-                    Log.e(NEWS_ACTIVITY_TAG, e.getMessage());
-                }
+                Picasso.with(getApplicationContext()).load(news.getFirstImageUrl()).into(imageView);
             } else {
                 imageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),
                         R.drawable.ic_error_black_48dp));

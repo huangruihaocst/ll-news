@@ -85,12 +85,7 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter {
         timeTextView.setText(formatter.format(date));
         sourceTextView.setText(news.getSourceName());
         if (news.getImageURLsJSON() != null) {
-            try {
-                JSONArray imageURLs = new JSONArray(news.getImageURLsJSON());
-                Picasso.with(context).load(imageURLs.getJSONObject(0).getString("url")).into(imageView);
-            } catch (JSONException e) {
-                Log.e(NEWS_RECYCLER_VIEW_TAG, e.getMessage());
-            }
+            Picasso.with(context).load(news.getFirstImageUrl()).into(imageView);
         } else {
             imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_error_black_48dp));
         }

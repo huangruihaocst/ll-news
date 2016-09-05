@@ -1,6 +1,12 @@
 package com.ihandy.a2014011385.helpers;
 
+import android.util.Log;
+
 import com.orm.SugarRecord;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.Serializable;
 
@@ -67,5 +73,14 @@ public class News extends SugarRecord implements Serializable {
     }
     public void toggleFavorite() {
         favorite = !favorite;
+    }
+    public String getFirstImageUrl() {
+        try {
+            JSONArray imageURLs = new JSONArray(imageURLsJSON);
+            return imageURLs.getJSONObject(0).getString("url");
+        } catch (JSONException e) {
+            Log.e(NEWS_TAG, e.getMessage());
+        }
+        return null;
     }
 }
