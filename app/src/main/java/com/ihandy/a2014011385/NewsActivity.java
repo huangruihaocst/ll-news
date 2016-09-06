@@ -43,7 +43,6 @@ public class NewsActivity extends AppCompatActivity {
     private final int SIMPLIFY_SUCCESS_WHAT = 0;
 
     News news;
-    TextView simplifiedTextView;
     String html = "";
     WebView contentWebView;
 
@@ -62,15 +61,8 @@ public class NewsActivity extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case SIMPLIFY_SUCCESS_WHAT:
-                        contentWebView.setVisibility(View.GONE);
-                        simplifiedTextView.setVisibility(View.VISIBLE);
-                        Spanned result;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                            result = Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
-                        } else {
-                            result = Html.fromHtml(html);
-                        }
-                        simplifiedTextView.setText(result);
+                        contentWebView.getSettings().setJavaScriptEnabled(true);
+                        contentWebView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null);
                         break;
                     default:
                         // nothing
@@ -122,7 +114,6 @@ public class NewsActivity extends AppCompatActivity {
                         R.drawable.ic_error_black_48dp));
             }
 
-            simplifiedTextView = (TextView) findViewById(R.id.simplifiedWeb);
         } else {
             Log.w(NEWS_ACTIVITY_TAG, "News is NullPointer");
         }

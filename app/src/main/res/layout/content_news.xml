@@ -8,22 +8,10 @@
     tools:context="com.ihandy.a2014011385.NewsActivity"
     tools:showIn="@layout/activity_news">
 
-    <LinearLayout
+    <WebView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <WebView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/content">
-        </WebView>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/simplifiedWeb"
-            android:textSize="20sp"
-            android:visibility="gone"/>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:id="@+id/content">
+    </WebView>
 
 </android.support.v4.widget.NestedScrollView>
