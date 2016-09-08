@@ -115,7 +115,7 @@ public class DataAccessor {
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
+                                ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response, categoryName);
                                 Collections.sort(newsArrayList, new Comparator<News>() {
                                     @Override
                                     public int compare(News n1, News n2) {
@@ -163,7 +163,7 @@ public class DataAccessor {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
+                        ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response, categoryName);
                         // refresh the first level of cache, cache has to be bigger
                         removeAll(cache.newsArrayListHashMap.get(categoryName), newsArrayList);
                         cache.newsArrayListHashMap.get(categoryName).addAll(newsArrayList);
@@ -216,7 +216,7 @@ public class DataAccessor {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response);
+                        ArrayList<News> newsArrayList = ParseHelper.parseNewsList(response, categoryName);
                         // refresh the first level of cache, cache has to be bigger
                         removeAll(cache.newsArrayListHashMap.get(categoryName), newsArrayList);
                         cache.newsArrayListHashMap.get(categoryName).addAll(newsArrayList);
@@ -252,24 +252,29 @@ public class DataAccessor {
     }
 
     public void simplifyWebsite(String url, final CallBack<String> callBack) {
-        RequestQueue queue = Volley.newRequestQueue(context);
-        String requestUrl = SIMPLIFY_URL + url;
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        callBack.onCallBack(response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
-                Toast.makeText(context, context.getString(R.string.simplify_error),
-                        Toast.LENGTH_LONG).show();
-                Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.simplify_error));
-                callBack.onCallBack(null);
-            }
-        });
-        queue.add(stringRequest);
+        if (url != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            String requestUrl = SIMPLIFY_URL + url;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            callBack.onCallBack(response);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) { // something wrong with the network, permitting there will not be something wrong with the server
+                    Toast.makeText(context, context.getString(R.string.simplify_error),
+                            Toast.LENGTH_LONG).show();
+                    Log.e(DATA_ACCESSOR_TAG, context.getString(R.string.simplify_error));
+                    callBack.onCallBack(null);
+                }
+            });
+            queue.add(stringRequest);
+        } else {
+            Log.w(DATA_ACCESSOR_TAG, "url is null");
+            callBack.onCallBack(null);
+        }
     }
 
     private void removeAll(ArrayList<News> l1, ArrayList<News> l2) { // remove items from l1 if it exists in l2

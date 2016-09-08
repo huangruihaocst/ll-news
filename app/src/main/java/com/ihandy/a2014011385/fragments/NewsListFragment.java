@@ -35,8 +35,10 @@ import java.util.ArrayList;
 public class NewsListFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String CATEGORY_NAME = "categoryName";
+    private static final String FILTERS = "filters";
 
     private String categoryName;
+    private ArrayList<String> filters;
     private boolean isLoading = false;
     private boolean noMore = false;
     private int visibleThreshold = 2;
@@ -64,12 +66,12 @@ public class NewsListFragment extends Fragment {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case GET_NEWS_LIST_MESSAGE_WHAT:
-                    adapter = new NewsRecyclerAdapter(getContext(), newsArrayList);
+                    adapter = new NewsRecyclerAdapter(getContext(), newsArrayList, filters);
                     newsRecyclerView.setAdapter(adapter);
                     newsListLength = newsArrayList.size();
                     break;
                 case REFRESH_MESSAGE_WHAT:
-                    adapter = new NewsRecyclerAdapter(getContext(), newsArrayList);
+                    adapter = new NewsRecyclerAdapter(getContext(), newsArrayList, filters);
                     newsRecyclerView.setAdapter(adapter);
                     swipeRefreshLayout.setRefreshing(false);
                     newsListLength = newsArrayList.size();
@@ -98,10 +100,11 @@ public class NewsListFragment extends Fragment {
      * @return A new instance of fragment NewsListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static NewsListFragment newInstance(String category) {
+    public static NewsListFragment newInstance(String category, ArrayList<String> filters) {
         NewsListFragment fragment = new NewsListFragment();
         Bundle args = new Bundle();
         args.putString(CATEGORY_NAME, category);
+        args.putStringArrayList(FILTERS, filters);
         fragment.setArguments(args);
         return fragment;
     }
@@ -111,6 +114,7 @@ public class NewsListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             categoryName = getArguments().getString(CATEGORY_NAME);
+            filters = getArguments().getStringArrayList(FILTERS);
         }
     }
 
@@ -232,5 +236,17 @@ public class NewsListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void setFilters(ArrayList<String> filters) {
+        if (filters != null) {
+            this.filters = new ArrayList<>();
+            for (String filter: filters) {
+                this.filters.add(filter);
+            }
+        }
+        if (adapter != null) { // fragments might have not been loaded, thus adapter is null
+            adapter.setFilters(filters);
+        }
     }
 }

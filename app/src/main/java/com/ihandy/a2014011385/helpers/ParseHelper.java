@@ -36,10 +36,16 @@ public class ParseHelper {
         return toCategoryArray(categories);
     }
 
-    public static void parseNews(News news, String newsJSON) {
+    /**
+     *
+     * @param news news object, update it
+     * @param newsJSON data stores in it
+     * @param categoryName cope with the fucking data source
+     */
+    public static void parseNews(News news, String newsJSON, String categoryName) {
         try {
             JSONObject newsObject = new JSONObject(newsJSON);
-            news.categoryName = newsObject.getString("category");
+            news.categoryName = categoryName;
             news.country = newsObject.getString("country");
             news.fetchedTime = newsObject.getLong("fetched_time");
             if (!newsObject.isNull("imgs")) {
@@ -56,8 +62,10 @@ public class ParseHelper {
             } else {
                 news.relativeNews = null;
             }
-            news.sourceName = newsObject.getJSONObject("source").getString("name");
-            news.sourceURL = newsObject.getJSONObject("source").getString("url");
+            if (!newsObject.isNull("source")) {
+                news.sourceName = newsObject.getJSONObject("source").getString("name");
+                news.sourceURL = newsObject.getJSONObject("source").getString("url");
+            }
             news.title = newsObject.getString("title");
             news.updatedTime = newsObject.getLong("updated_time");
         } catch (JSONException e) {
@@ -65,7 +73,7 @@ public class ParseHelper {
         }
     }
 
-    public static ArrayList<News> parseNewsList(String newsListJSON) {
+    public static ArrayList<News> parseNewsList(String newsListJSON, String categoryName) {
         ArrayList<News> newsArrayList = new ArrayList<>();
         try {
             JSONObject responseListObject = new JSONObject(newsListJSON);
@@ -73,7 +81,7 @@ public class ParseHelper {
             JSONArray newsListArray = dataObject.getJSONArray("news");
             for (int i = 0; i < newsListArray.length(); ++i) {
                 JSONObject newsObject = newsListArray.getJSONObject(i);
-                News news = new News(newsObject.toString());
+                News news = new News(newsObject.toString(), categoryName);
                 newsArrayList.add(news);
             }
         } catch (JSONException e) {

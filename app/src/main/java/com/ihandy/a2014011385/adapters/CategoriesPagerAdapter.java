@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.util.Pair;
 
+import com.ihandy.a2014011385.fragments.NewsListFragment;
 import com.ihandy.a2014011385.helpers.Category;
 
 import java.util.ArrayList;
@@ -43,6 +44,13 @@ public class CategoriesPagerAdapter extends FragmentPagerAdapter {
         }
         Pair<Fragment, Category> pair = new Pair<>(fragment, category);
         categoriesList.add(pair);
+        notifyDataSetChanged();
+    }
+    public void setFilters(ArrayList<String> filters) {
+        for (Pair<Fragment, Category> pair: categoriesList) {
+            NewsListFragment fragment = (NewsListFragment) pair.first;
+            fragment.setFilters(filters);
+        }
         notifyDataSetChanged();
     }
 }

@@ -31,8 +31,8 @@ public class News extends SugarRecord implements Serializable {
 
     public News() {}
 
-    public News(String newsJSON) { // DataAccessor has permit the newsJSON to be valid
-        ParseHelper.parseNews(this, newsJSON);
+    public News(String newsJSON, String categoryName) { // DataAccessor has permit the newsJSON to be valid
+        ParseHelper.parseNews(this, newsJSON, categoryName);
     }
 
     public String getCategoryName() {

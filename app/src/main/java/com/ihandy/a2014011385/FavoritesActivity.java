@@ -50,7 +50,7 @@ public class FavoritesActivity extends AppCompatActivity {
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         favoritesRecyclerView.setLayoutManager(layoutManager);
         List<News> favoriteNewsList = Select.from(News.class).where(Condition.prop("favorite").eq(1)).list();
-        NewsRecyclerAdapter adapter = new NewsRecyclerAdapter(getApplicationContext(), new ArrayList<>(favoriteNewsList));
+        NewsRecyclerAdapter adapter = new NewsRecyclerAdapter(getApplicationContext(), new ArrayList<>(favoriteNewsList), null);
         favoritesRecyclerView.setAdapter(adapter);
     }
 }

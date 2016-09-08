@@ -205,6 +205,7 @@ public class NewsActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        // TODO: share to Wechat
         if (id == R.id.action_share) {
             Intent shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);

@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -22,10 +20,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
+import com.google.common.base.Joiner;
 import com.ihandy.a2014011385.adapters.CategoriesPagerAdapter;
 import com.ihandy.a2014011385.fragments.NewsListFragment;
 import com.ihandy.a2014011385.helpers.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -36,12 +39,11 @@ public class MainActivity extends AppCompatActivity
     CategoriesPagerAdapter adapter;
     ViewPager pager;
     TabLayout categoriesTabLayout;
+    ArrayList<String> filters;
 
     private final int GET_CATEGORIES_MESSAGE_WHAT = 0;
 
     private final String MAIN_ACTIVITY_TAG = "MainActivity";
-
-    TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +56,33 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle(getString(R.string.set_filter));
+                final EditText editText = new EditText(getApplicationContext());
+                if (filters != null && filters.size() != 0) {
+                    editText.setText(Joiner.on(' ').join(filters));
+                }
+                builder.setView(editText);
+                builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String filter = editText.getText().toString();
+                        if (!filter.equals("")) {
+                            String[] temp = filter.split("\\s+");
+                            filters = new ArrayList<>(Arrays.asList(temp));
+                        } else {
+                            filters = new ArrayList<>();
+                        }
+                        // TODO: still do not know why cannot affect adapters that have not initialized
+                        adapter.setFilters(filters);
+                    }
+                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // nothing
+                    }
+                });
+                builder.create().show();
             }
         });
 
@@ -82,7 +109,7 @@ public class MainActivity extends AppCompatActivity
                     case GET_CATEGORIES_MESSAGE_WHAT:
                         for (Category category: categories) {
                             if (category.subscribing) {
-                                adapter.addFragment(NewsListFragment.newInstance(category.name), category);
+                                adapter.addFragment(NewsListFragment.newInstance(category.name, filters), category);
                             }
                         }
                         break;
@@ -190,16 +217,11 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_favorites) {
             Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_settings) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_about) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle(getString(R.string.action_about));
+            builder.setMessage(getString(R.string.info));
+            builder.create().show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

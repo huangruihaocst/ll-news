@@ -7,7 +7,7 @@
     <string name="action_subscribe">订阅</string>
     <string name="action_share">分享</string>
     <string name="action_favorites">收藏</string>
-    <string name="action_settings">设置</string>
+    <string name="action_about">关于</string>
     <string name="read">读新闻</string>
 
     <string name="pref_header_theme">主题</string>
@@ -43,6 +43,9 @@
     <string name="transfer_to_reading">已经切换到阅读模式</string>
     <string name="transfer_to_original">已经切换到原始模式</string>
 
-    <string name="please_simplify_first">请先简化页面</string>
+    <string name="set_filter">设置过滤关键词</string>
 
+    <string name="info">黄锐皓 2014011385 计44 15201206046</string>
+    <string name="email">huangruihaocst@126.com</string>
+    <string name="name">黄锐皓</string>
 </resources>
