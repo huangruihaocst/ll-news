@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by huangruihao on 16-8-30.
@@ -78,6 +80,17 @@ public class ParseHelper {
             Log.e(PARSE_HELPER_TAG, e.getMessage());
         }
         return newsArrayList;
+    }
+
+    public static String getContentFromHtml(String html) {
+        StringBuilder builder = new StringBuilder();
+        Pattern pattern = Pattern.compile(">(.*?)<");
+        Matcher matcher = pattern.matcher(html);
+        while (matcher.find()) {
+            String content = matcher.group();
+            builder.append(content);
+        }
+        return builder.toString();
     }
 
     private static long[] toLongArray(JSONArray jsonArray) throws JSONException{

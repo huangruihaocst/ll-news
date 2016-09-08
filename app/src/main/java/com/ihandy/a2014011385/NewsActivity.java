@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.ihandy.a2014011385.helpers.CallBack;
 import com.ihandy.a2014011385.helpers.DataAccessor;
 import com.ihandy.a2014011385.helpers.News;
+import com.ihandy.a2014011385.helpers.ParseHelper;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.squareup.picasso.Picasso;
@@ -42,27 +43,38 @@ public class NewsActivity extends AppCompatActivity {
 
     private final int SIMPLIFY_SUCCESS_WHAT = 0;
 
+    Handler handler = new Handler();
+
     News news;
     String html = "";
     WebView contentWebView;
+
+    enum Mode{
+        Original,
+        Reading
+    }
+
+    Mode mode = Mode.Original;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         Intent intent = getIntent();
         Bundle data = intent.getExtras();
         news = (News) data.getSerializable(getString(R.string.key_main_news));
 
-        final Handler handler = new Handler(Looper.getMainLooper()) {
+        handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case SIMPLIFY_SUCCESS_WHAT:
                         contentWebView.getSettings().setJavaScriptEnabled(true);
                         contentWebView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null);
+                        mode = Mode.Reading;
+                        Toast.makeText(getApplicationContext(), getString(R.string.transfer_to_reading), Toast.LENGTH_LONG).show();
                         break;
                     default:
                         // nothing
@@ -122,20 +134,26 @@ public class NewsActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (mode == Mode.Original) {
+                    DataAccessor accessor = DataAccessor.getInstance();
+                    accessor.setContext(getApplicationContext());
+                    accessor.simplifyWebsite(news.getSourceURL(), new CallBack<String>() {
+                        @Override
+                        public void onCallBack(String response) {
+                            if (response != null) { // equaling null means failing
+                                html = response;
+                                Message message = new Message();
+                                message.what = SIMPLIFY_SUCCESS_WHAT;
+                                handler.sendMessage(message);
+                            }
+                        }
+                    });
+                } else { // reading mode
+                    contentWebView.loadUrl(news.getSourceURL()); // set content
+                    mode = Mode.Original;
+                    Toast.makeText(getApplicationContext(), getString(R.string.transfer_to_original), Toast.LENGTH_LONG).show();
+                }
 
-                DataAccessor accessor = DataAccessor.getInstance();
-                accessor.setContext(getApplicationContext());
-                accessor.simplifyWebsite(news.getSourceURL(), new CallBack<String>() {
-                    @Override
-                    public void onCallBack(String response) {
-                        html = response;
-                        Message message = new Message();
-                        message.what = SIMPLIFY_SUCCESS_WHAT;
-                        handler.sendMessage(message);
-                    }
-                });
             }
         });
 
@@ -208,6 +226,13 @@ public class NewsActivity extends AppCompatActivity {
                 }
             }
             return true;
+        } else if (id == R.id.action_tts) {
+            if (html.equals("")) { // if not simplified yet, first simplify
+                Toast.makeText(getApplicationContext(), getString(R.string.please_simplify_first), Toast.LENGTH_LONG).show();
+            } else {
+                String content = ParseHelper.getContentFromHtml(html);
+                Toast.makeText(NewsActivity.this, "OK", Toast.LENGTH_SHORT).show();
+            }
         }
 
         return super.onOptionsItemSelected(item);

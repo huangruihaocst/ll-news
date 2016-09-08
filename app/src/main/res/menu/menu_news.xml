@@ -15,4 +15,12 @@
         android:icon="@drawable/ic_share_white_48dp"
         app:showAsAction="ifRoom"
         android:actionProviderClass="android.widget.ShareActionProvider"/>
+
+    <item
+        android:id="@+id/action_tts"
+        android:title="@string/read"
+        android:icon="@drawable/ic_volume_up_white_48dp"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="100">
+    </item>
 </menu>

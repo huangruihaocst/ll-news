@@ -30,7 +30,7 @@ public class DataAccessor {
     private final String GET_CATEGORIES_URL = "http://assignment.crazz.cn/news/en/category?timestamp=";
     private final String GET_MORE_NEWS_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>&max_news_id=";
     private final String GET_NEWS_LIST_URL = "http://assignment.crazz.cn/news/query?locale=en&category=<category>";
-    private final String SIMPLIFY_URL = "http://59.66.131.163:8080/readability/";
+    private final String SIMPLIFY_URL = "http://10.7.1.86:8080/readability/";
 
     private static DataAccessor ourInstance = new DataAccessor();
 
