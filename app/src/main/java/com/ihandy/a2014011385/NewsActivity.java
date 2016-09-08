@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -36,17 +37,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.List;
+import java.util.Locale;
 
 public class NewsActivity extends AppCompatActivity {
 
     private final String NEWS_ACTIVITY_TAG = "NewsActivity";
 
     private final int SIMPLIFY_SUCCESS_WHAT = 0;
+    private final int ONLY_GET_HTML_WHAT = 1;
 
     Handler handler = new Handler();
 
+    TextToSpeech tts;
+    boolean ttsIsWorking = false;
+
     News news;
     String html = "";
+    String content = "";
     WebView contentWebView;
 
     enum Mode{
@@ -76,11 +83,25 @@ public class NewsActivity extends AppCompatActivity {
                         mode = Mode.Reading;
                         Toast.makeText(getApplicationContext(), getString(R.string.transfer_to_reading), Toast.LENGTH_LONG).show();
                         break;
+                    case ONLY_GET_HTML_WHAT:
+                        content = ParseHelper.getContentFromHtml(html);
+                        tts.speak(content, TextToSpeech.QUEUE_FLUSH, null);
+                        ttsIsWorking = true;
+                        break;
                     default:
                         // nothing
                 }
             }
         };
+
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    tts.setLanguage(Locale.US);
+                }
+            }
+        });
 
         if (news != null) {
             toolbar.setTitle(news.getTitle()); // set title
@@ -135,19 +156,25 @@ public class NewsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (mode == Mode.Original) {
-                    DataAccessor accessor = DataAccessor.getInstance();
-                    accessor.setContext(getApplicationContext());
-                    accessor.simplifyWebsite(news.getSourceURL(), new CallBack<String>() {
-                        @Override
-                        public void onCallBack(String response) {
-                            if (response != null) { // equaling null means failing
-                                html = response;
-                                Message message = new Message();
-                                message.what = SIMPLIFY_SUCCESS_WHAT;
-                                handler.sendMessage(message);
+                    if (html.equals("")) {
+                        DataAccessor accessor = DataAccessor.getInstance();
+                        accessor.setContext(getApplicationContext());
+                        accessor.simplifyWebsite(news.getSourceURL(), new CallBack<String>() {
+                            @Override
+                            public void onCallBack(String response) {
+                                if (response != null) { // equaling null means failing
+                                    html = response;
+                                    Message message = new Message();
+                                    message.what = SIMPLIFY_SUCCESS_WHAT;
+                                    handler.sendMessage(message);
+                                }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        Message message = new Message();
+                        message.what = SIMPLIFY_SUCCESS_WHAT;
+                        handler.sendMessage(message);
+                    }
                 } else { // reading mode
                     contentWebView.loadUrl(news.getSourceURL()); // set content
                     mode = Mode.Original;
@@ -228,13 +255,45 @@ public class NewsActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_tts) {
             if (html.equals("")) { // if not simplified yet, first simplify
-                Toast.makeText(getApplicationContext(), getString(R.string.please_simplify_first), Toast.LENGTH_LONG).show();
+                DataAccessor accessor = DataAccessor.getInstance();
+                accessor.setContext(getApplicationContext());
+                accessor.simplifyWebsite(news.getSourceURL(), new CallBack<String>() {
+                    @Override
+                    public void onCallBack(String response) {
+                        if (response != null) { // equaling null means failing
+                            html = response;
+                            Message message = new Message();
+                            message.what = ONLY_GET_HTML_WHAT;
+                            handler.sendMessage(message);
+                        }
+                    }
+                });
             } else {
-                String content = ParseHelper.getContentFromHtml(html);
-                Toast.makeText(NewsActivity.this, "OK", Toast.LENGTH_SHORT).show();
+                tts.speak(content, TextToSpeech.QUEUE_FLUSH, null);
+                ttsIsWorking = true;
             }
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (tts != null) {
+            ttsIsWorking = false;
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (ttsIsWorking) {
+            ttsIsWorking = false;
+            tts.stop();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

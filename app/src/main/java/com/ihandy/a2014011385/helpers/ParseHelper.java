@@ -90,7 +90,9 @@ public class ParseHelper {
             String content = matcher.group();
             builder.append(content);
         }
-        return builder.toString();
+        String result = builder.toString();
+        result = result.replaceAll("<|>", "");
+        return result;
     }
 
     private static long[] toLongArray(JSONArray jsonArray) throws JSONException{
