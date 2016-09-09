@@ -22,7 +22,7 @@ An Android application used for reading news. Source code at [Git9](https://git.
 
 ## Cautions
 - For simplifying, reading and word filter, must run the server in advance
-- To run the server, must replace the server's ip with its real ip in app/src/main/java/com/ihandy/a2014011385/helpers/DataAccessor.java
+- To run the server, replace the server's ip with its real ip in app/src/main/java/com/ihandy/a2014011385/helpers/DataAccessor.java
 
 ## About How to Run the Server
 1. `sudo apt-get install nodejs`
