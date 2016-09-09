@@ -1,6 +1,8 @@
 package com.ihandy.a2014011385;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,12 +10,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +21,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ihandy.a2014011385.helpers.CallBack;
@@ -32,6 +30,11 @@ import com.ihandy.a2014011385.helpers.ParseHelper;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.squareup.picasso.Picasso;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +48,9 @@ public class NewsActivity extends AppCompatActivity {
 
     private final int SIMPLIFY_SUCCESS_WHAT = 0;
     private final int ONLY_GET_HTML_WHAT = 1;
+
+    private final String APP_ID = "wxee23946817108b5f";
+    private IWXAPI api;
 
     Handler handler = new Handler();
 
@@ -184,6 +190,9 @@ public class NewsActivity extends AppCompatActivity {
             }
         });
 
+        // register WeChat
+        api = WXAPIFactory.createWXAPI(this, APP_ID, true);
+        api.registerApp(APP_ID);
     }
 
     @Override
@@ -205,27 +214,52 @@ public class NewsActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        // TODO: share to Wechat
+        // Sharing is really simple and not easy to use:
+        // If WeChat is installed, only share through WeChat, else share plain text
+        // Do not support a list for user to select the app to share to
+        // The thumb is a fixed image and can only share to friends
+        // What is even worse, I did not have a Android phone when I write this part of code, so I did not checked out if it works
+        // It is likely to crash or has no reaction. lol
+        // Sharing is only a demo, to show that my app offers this function and I know how to use WeChat API
         if (id == R.id.action_share) {
-            Intent shareIntent = new Intent();
-            shareIntent.setAction(Intent.ACTION_SEND);
-            String imageUrl = "";
-            if (news.getImageURLsJSON() != null) {
-                try {
-                    JSONArray imageUrls = new JSONArray(news.getImageURLsJSON());
-                    imageUrl = imageUrls.getJSONObject(0).getString("url");
-                } catch (JSONException e) {
-                    Log.e(NEWS_ACTIVITY_TAG, e.getMessage());
+            if (news.getSourceURL() != null) {
+                if (api.isWXAppInstalled()) {
+                    WXWebpageObject page = new WXWebpageObject();
+                    page.webpageUrl = news.getSourceURL();
+                    WXMediaMessage message = new WXMediaMessage(page);
+                    message.title = news.getTitle();
+                    Bitmap thumb = BitmapFactory.decodeResource(getResources(), R.drawable.ic_error_black_48dp);
+                    message.setThumbImage(thumb);
+                    SendMessageToWX.Req req = new SendMessageToWX.Req();
+                    req.transaction = String.valueOf(System.currentTimeMillis());
+                    req.message = message;
+                    req.scene = 1; // to friends
+                    api.sendReq(req);
+                } else {
+                    Intent shareIntent = new Intent();
+                    shareIntent.setAction(Intent.ACTION_SEND);
+                    String imageUrl = "";
+                    if (news.getImageURLsJSON() != null) {
+                        try {
+                            JSONArray imageUrls = new JSONArray(news.getImageURLsJSON());
+                            imageUrl = imageUrls.getJSONObject(0).getString("url");
+                        } catch (JSONException e) {
+                            Log.e(NEWS_ACTIVITY_TAG, e.getMessage());
+                        }
+                    } else {
+                        imageUrl = getString(R.string.no_picture);
+                    }
+                    String shareContent = getString(R.string.title) + ":" + news.getTitle() + " "
+                            + getString(R.string.source) + ":" + news.getSourceURL() + " " +
+                            getString(R.string.picture) + ":" + imageUrl;
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
+                    shareIntent.setType("text/plain");
+                    startActivity(shareIntent);
                 }
             } else {
-                imageUrl = getString(R.string.no_picture);
+                Toast.makeText(getApplicationContext(), getString(R.string.url_is_null), Toast.LENGTH_LONG).show();
             }
-            String shareContent = getString(R.string.title) + ":" + news.getTitle() + " "
-                    + getString(R.string.source) + ":" + news.getSourceURL() + " " +
-                    getString(R.string.picture) + ":" + imageUrl;
-            shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
-            shareIntent.setType("text/plain");
-            startActivity(shareIntent);
+
             return true;
         } else if (id == R.id.action_favorites) {
             if (news.isFavorite()) { // change to not favorite
